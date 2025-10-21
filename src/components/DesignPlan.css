@@ -1,0 +1,193 @@
+.design-plan-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.design-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.design-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.design-header p {
+  font-size: 1.1rem;
+}
+
+.instructions {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.instruction-box strong {
+  display: block;
+  margin-bottom: 10px;
+  color: #1f2937;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  justify-content: center;
+  align-items: center;
+}
+
+.toolbar select {
+  padding: 8px;
+  font-size: 1rem;
+  border: 2px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+}
+
+.toolbar select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.toolbar div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar label {
+  font-size: 1rem;
+  color: #1f2937;
+}
+
+.toolbar input[type="number"] {
+  padding: 8px;
+  font-size: 1rem;
+  border: 2px solid #d1d5db;
+  border-radius: 6px;
+  width: 80px;
+}
+
+.canvas-wrapper {
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.canvas-wrapper canvas {
+  max-width: 100%;
+}
+
+.button-container {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.btn {
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-tool {
+  background: white;
+  border: 2px solid #d1d5db;
+}
+
+.btn-tool:hover {
+  background: #f3f4f6;
+}
+
+.btn-tool.active {
+  background: #3b82f6;
+  color: white;
+  border: 2px solid #1e40af;
+}
+
+.btn-secondary {
+  background: white;
+  border: 2px solid #d1d5db;
+}
+
+.btn-secondary:hover {
+  background: #f3f4f6;
+}
+
+.btn-primary {
+  background: #10b981;
+  color: white;
+  flex: 1;
+  max-width: 300px;
+}
+
+.btn-primary:hover {
+  background: #059669;
+}
+
+.btn-primary:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .button-container {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .button-container .btn {
+    flex: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .toolbar select,
+  .toolbar input[type="number"] {
+    width: 100%;
+  }
+
+  .canvas-wrapper {
+    height: 500px;
+  }
+
+  .canvas-wrapper canvas {
+    height: 100% !important;
+    width: 100% !important;
+  }
+
+  .design-plan-container {
+    padding: 10px;
+  }
+}

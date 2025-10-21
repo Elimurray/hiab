@@ -1,21 +1,26 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { GoogleMap, Marker } from "@react-google-maps/api";
 import { useDelivery } from "../context/DeliveryContext";
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 import "./ReviewPage.css";
 
 const ReviewPage = () => {
   const navigate = useNavigate();
-  const { markers, mapCenter, formData } = useDelivery();
-  const mapRef = useRef(null);
+  const { mapScreenshot, designPlan, formData } = useDelivery();
+  const canvasRef = useRef(null);
 
   // Check if we have all required data
   useEffect(() => {
-    if (!markers.truck || !markers.drop) {
-      alert("Please complete the map markers first!");
-      navigate("/");
+    if (
+      !mapScreenshot ||
+      !designPlan.truck ||
+      !designPlan.dropZones.length ||
+      !designPlan.loadArrow ||
+      !designPlan.driver ||
+      !designPlan.windArrow
+    ) {
+      alert("Please complete the design plan first!");
+      navigate("/design-plan");
       return;
     }
 
@@ -24,38 +29,109 @@ const ReviewPage = () => {
       navigate("/form");
       return;
     }
-  }, [markers, formData, navigate]);
 
-  const mapContainerStyle = {
-    width: "100%",
-    height: "400px",
-    borderRadius: "8px",
-  };
+    // Render design plan on canvas
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+    img.src = mapScreenshot;
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
 
-  const mapOptions = {
-    mapTypeId: "satellite",
-    disableDefaultUI: true,
-    zoomControl: false,
-    streetViewControl: false,
-    mapTypeControl: false,
-    fullscreenControl: false,
-  };
+      // Draw annotations (same logic as DesignPlan.jsx)
+      const icons = {
+        truck: "https://example.com/truck-icon.png",
+        cone: "https://example.com/cone-icon.png",
+        driver: "https://example.com/driver-icon.png",
+        loadArrow: "https://example.com/arrow-icon.png",
+        windArrow: "https://example.com/wind-arrow-icon.png",
+      };
 
-  // Generate PDF
+      const drawIcon = (src, x, y, size = 30, rotation = 0) => {
+        const icon = new Image();
+        icon.src = src;
+        icon.onload = () => {
+          ctx.save();
+          ctx.translate(x + size / 2, y + size / 2);
+          ctx.rotate((rotation * Math.PI) / 180);
+          ctx.drawImage(icon, -size / 2, -size / 2, size, size);
+          ctx.restore();
+        };
+      };
+
+      designPlan.lines.forEach((line) => {
+        ctx.beginPath();
+        ctx.strokeStyle = line.color;
+        ctx.lineWidth = 3;
+        line.points.forEach((point, index) => {
+          if (index === 0) {
+            ctx.moveTo(point.x, point.y);
+          } else {
+            ctx.lineTo(point.x, point.y);
+          }
+        });
+        ctx.stroke();
+      });
+
+      if (designPlan.truck) {
+        drawIcon(icons.truck, designPlan.truck.x, designPlan.truck.y);
+      }
+
+      designPlan.cones.forEach((cone) => {
+        drawIcon(icons.cone, cone.x, cone.y, 20);
+      });
+
+      designPlan.dropZones.forEach((zone) => {
+        ctx.fillStyle = "#EF4444";
+        ctx.beginPath();
+        ctx.arc(zone.x, zone.y, 15, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.fillStyle = "#FFFFFF";
+        ctx.font = "14px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(zone.number.toString(), zone.x, zone.y);
+      });
+
+      if (designPlan.loadArrow) {
+        drawIcon(
+          icons.loadArrow,
+          designPlan.loadArrow.x,
+          designPlan.loadArrow.y,
+          30,
+          designPlan.loadArrow.rotation
+        );
+      }
+
+      if (designPlan.driver) {
+        drawIcon(icons.driver, designPlan.driver.x, designPlan.driver.y);
+      }
+
+      if (designPlan.windArrow) {
+        drawIcon(
+          icons.windArrow,
+          designPlan.windArrow.x,
+          designPlan.windArrow.y,
+          30,
+          designPlan.windArrow.rotation
+        );
+      }
+    };
+  }, [mapScreenshot, designPlan, formData, navigate]);
+
   // Generate PDF
   const generatePDF = async () => {
     try {
       console.log("Starting PDF generation...");
-
-      // Create new PDF
       const pdf = new jsPDF("p", "mm", "a4");
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
       const margin = 10;
-      const maxY = pageHeight - 20; // Leave space for footer
+      const maxY = pageHeight - 20;
       let yPosition = 20;
 
-      // Helper function to check if we need a new page
       const checkPageBreak = (requiredSpace) => {
         if (yPosition + requiredSpace > maxY) {
           pdf.addPage();
@@ -80,7 +156,7 @@ const ReviewPage = () => {
       });
       yPosition += 5;
 
-      // Delivery Information Section
+      // Delivery Information
       checkPageBreak(50);
       pdf.setFillColor(255, 255, 255);
       pdf.rect(margin, yPosition, pageWidth - margin * 2, 45, "F");
@@ -119,7 +195,7 @@ const ReviewPage = () => {
 
       yPosition += 5;
 
-      // Load Details Section
+      // Load Details
       checkPageBreak(25);
       pdf.setFillColor(255, 255, 255);
       pdf.rect(margin, yPosition, pageWidth - margin * 2, 20, "F");
@@ -145,84 +221,56 @@ const ReviewPage = () => {
 
       yPosition += 10;
 
-      // Capture map as image
-      const mapElement = document.getElementById("pdf-map");
-      if (mapElement) {
-        console.log("Capturing map screenshot...");
-        const canvas = await html2canvas(mapElement, {
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: "#ffffff",
-          scale: 2, // Improve quality on small screens
-        });
+      // Design Plan
+      if (mapScreenshot) {
+        const canvas = canvasRef.current;
         const imgData = canvas.toDataURL("image/png");
-
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const margin = 10;
         const maxImageWidth = pageWidth - margin * 2;
-        const maxImageHeight = 120; // Limit height to ~120mm (~1/2 page) to prevent overflow
+        const maxImageHeight = 120;
 
-        // Calculate dimensions while preserving aspect ratio and respecting max height
         let imgWidth = canvas.width;
         let imgHeight = canvas.height;
 
-        // First, scale to fit width
         if (imgWidth > maxImageWidth) {
           const scaleFactor = maxImageWidth / imgWidth;
           imgWidth = maxImageWidth;
           imgHeight = imgHeight * scaleFactor;
         }
 
-        // Then, if still too tall, scale down to max height
         if (imgHeight > maxImageHeight) {
           const scaleFactor = maxImageHeight / imgHeight;
           imgWidth = imgWidth * scaleFactor;
           imgHeight = maxImageHeight;
         }
 
-        // Calculate x position to center the image
-        const xPosition = (pageWidth - imgWidth) / 2; // Center horizontally
+        const xPosition = (pageWidth - imgWidth) / 2;
 
-        // Check if map fits on current page (use constrained height)
-        checkPageBreak(imgHeight + 20); // +20 for title + padding
+        checkPageBreak(imgHeight + 20);
 
-        // Add title
         pdf.setFontSize(14);
         pdf.setFont("helvetica", "bold");
         pdf.text("Site Plan", 15, yPosition);
         yPosition += 7;
 
-        // Add image with centered x position
         pdf.addImage(imgData, "PNG", xPosition, yPosition, imgWidth, imgHeight);
         yPosition += imgHeight + 10;
       }
 
-      // Marker coordinates
-      checkPageBreak(20);
+      // Annotations Summary
+      checkPageBreak(30);
       yPosition += 5;
       pdf.setFontSize(10);
       pdf.setFont("helvetica", "bold");
-      pdf.text("Truck Position:", 15, yPosition);
-      pdf.setFont("helvetica", "normal");
-      pdf.text(
-        `${markers.truck.lat.toFixed(6)}, ${markers.truck.lng.toFixed(6)}`,
-        50,
-        yPosition
-      );
-
+      pdf.text("Annotations:", 15, yPosition);
       yPosition += 7;
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Drop Location:", 15, yPosition);
       pdf.setFont("helvetica", "normal");
-      pdf.text(
-        `${markers.drop.lat.toFixed(6)}, ${markers.drop.lng.toFixed(6)}`,
-        50,
-        yPosition
-      );
+      pdf.text(`Drop Zones: ${designPlan.dropZones.length}`, 20, yPosition);
+      yPosition += 7;
+      pdf.text(`Cones: ${designPlan.cones.length}`, 20, yPosition);
+      yPosition += 7;
+      pdf.text(`Lines: ${designPlan.lines.length}`, 20, yPosition);
 
-      yPosition += 10;
-
-      // Access Notes (if provided)
+      // Access Notes
       if (formData.accessNotes) {
         const splitNotes = pdf.splitTextToSize(
           formData.accessNotes,
@@ -247,7 +295,7 @@ const ReviewPage = () => {
         yPosition += splitNotes.length * 5 + 10;
       }
 
-      // Special Instructions (if provided)
+      // Special Instructions
       if (formData.specialInstructions) {
         const splitInstructions = pdf.splitTextToSize(
           formData.specialInstructions,
@@ -277,8 +325,8 @@ const ReviewPage = () => {
         pdf.text(splitInstructions, 15, yPosition);
       }
 
-      // Footer on last page
-      const totalPages = pdf.internal.pages.length - 1; // -1 because first page is null
+      // Footer
+      const totalPages = pdf.internal.pages.length - 1;
       for (let i = 1; i <= totalPages; i++) {
         pdf.setPage(i);
         pdf.setFontSize(8);
@@ -291,7 +339,6 @@ const ReviewPage = () => {
         );
       }
 
-      // Save PDF
       pdf.save(`Hiab-Site-Plan-${formData.clientName.replace(/\s/g, "-")}.pdf`);
       console.log("PDF generated successfully!");
     } catch (error) {
@@ -304,7 +351,7 @@ const ReviewPage = () => {
     <div className="review-container">
       <div className="review-header">
         <h1>Review & Generate PDF</h1>
-        <p>Step 3: Review your delivery plan and generate PDF</p>
+        <p>Step 4: Review your delivery plan and generate PDF</p>
       </div>
 
       <div className="review-content">
@@ -348,60 +395,43 @@ const ReviewPage = () => {
           </div>
         </div>
 
-        {/* Map */}
+        {/* Design Plan */}
         <div className="review-section map-section">
           <h2>Site Plan</h2>
           <div id="pdf-map" className="review-map">
-            <GoogleMap
-              mapContainerStyle={mapContainerStyle}
-              center={mapCenter}
-              zoom={18}
-              options={mapOptions}
-              onLoad={(map) => (mapRef.current = map)}
-            >
-              {markers.truck && (
-                <Marker
-                  position={markers.truck}
-                  icon={{
-                    path: window.google.maps.SymbolPath.CIRCLE,
-                    scale: 12,
-                    fillColor: "#3B82F6",
-                    fillOpacity: 1,
-                    strokeColor: "#1E40AF",
-                    strokeWeight: 3,
-                  }}
-                  title="Truck Position"
-                />
-              )}
-              {markers.drop && (
-                <Marker
-                  position={markers.drop}
-                  icon={{
-                    path: window.google.maps.SymbolPath.CIRCLE,
-                    scale: 12,
-                    fillColor: "#EF4444",
-                    fillOpacity: 1,
-                    strokeColor: "#991B1B",
-                    strokeWeight: 3,
-                  }}
-                  title="Drop Location"
-                />
-              )}
-            </GoogleMap>
+            <canvas ref={canvasRef} />
           </div>
           <div className="coordinates">
             <div className="coord-item">
               <div className="coord-marker blue"></div>
               <span>
-                Truck: {markers.truck?.lat.toFixed(6)},{" "}
-                {markers.truck?.lng.toFixed(6)}
+                Truck Position: {designPlan.truck ? "Set" : "Not set"}
               </span>
             </div>
             <div className="coord-item">
               <div className="coord-marker red"></div>
+              <span>Drop Zones: {designPlan.dropZones.length}</span>
+            </div>
+            <div className="coord-item">
+              <div className="coord-marker orange"></div>
+              <span>Cones: {designPlan.cones.length}</span>
+            </div>
+            <div className="coord-item">
+              <div className="coord-marker green"></div>
               <span>
-                Drop: {markers.drop?.lat.toFixed(6)},{" "}
-                {markers.drop?.lng.toFixed(6)}
+                Driver Position: {designPlan.driver ? "Set" : "Not set"}
+              </span>
+            </div>
+            <div className="coord-item">
+              <div className="coord-marker purple"></div>
+              <span>
+                Load Direction: {designPlan.loadArrow ? "Set" : "Not set"}
+              </span>
+            </div>
+            <div className="coord-item">
+              <div className="coord-marker cyan"></div>
+              <span>
+                Wind Direction: {designPlan.windArrow ? "Set" : "Not set"}
               </span>
             </div>
           </div>
@@ -424,7 +454,6 @@ const ReviewPage = () => {
         )}
       </div>
 
-      {/* Actions */}
       <div className="review-actions">
         <button className="btn btn-secondary" onClick={() => navigate("/form")}>
           ← Edit Details

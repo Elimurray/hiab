@@ -1,23 +1,33 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDelivery } from "../context/DeliveryContext"; // ADD THIS
+import { useDelivery } from "../context/DeliveryContext";
 import "./DeliveryForm.css";
 
 const DeliveryForm = () => {
   const navigate = useNavigate();
-  const { formData: contextFormData, updateFormData, markers } = useDelivery(); // ADD THIS
+  const {
+    formData: contextFormData,
+    updateFormData,
+    designPlan,
+  } = useDelivery();
 
   // Initialize form with context data
   const [formData, setFormData] = useState(contextFormData);
   const [errors, setErrors] = useState({});
 
-  // Check if markers exist, if not redirect to map
+  // Check if design plan exists, if not redirect to design plan
   useEffect(() => {
-    if (!markers.truck || !markers.drop) {
-      alert("Please place markers on the map first!");
-      navigate("/");
+    if (
+      !designPlan.truck ||
+      !designPlan.dropZones.length ||
+      !designPlan.loadArrow ||
+      !designPlan.driver ||
+      !designPlan.windArrow
+    ) {
+      alert("Please complete the design plan first!");
+      navigate("/design-plan");
     }
-  }, [markers, navigate]);
+  }, [designPlan, navigate]);
 
   // Handle input changes
   const handleChange = (e) => {
@@ -27,7 +37,7 @@ const DeliveryForm = () => {
       [name]: value,
     }));
 
-    // Clear error for this field when user starts typing
+    // Clear error for this field
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
@@ -73,25 +83,23 @@ const DeliveryForm = () => {
     e.preventDefault();
 
     if (validateForm()) {
-      // Save form data to context
       updateFormData(formData);
       console.log("Form data saved to context:", formData);
       navigate("/review");
     }
   };
 
-  // Go back to map
+  // Go back to design plan
   const handleBack = () => {
-    // Save current form data to context before leaving
     updateFormData(formData);
-    navigate("/");
+    navigate("/design-plan");
   };
 
   return (
     <div className="form-container">
       <div className="form-header">
         <h1>Delivery Details</h1>
-        <p>Step 2: Fill in the delivery information</p>
+        <p>Step 3: Fill in the delivery information</p>
       </div>
 
       <form onSubmit={handleSubmit} className="delivery-form">
@@ -262,7 +270,7 @@ const DeliveryForm = () => {
             className="btn btn-secondary"
             onClick={handleBack}
           >
-            ← Back to Map
+            ← Back to Design Plan
           </button>
           <button type="submit" className="btn btn-primary">
             Review & Generate PDF →

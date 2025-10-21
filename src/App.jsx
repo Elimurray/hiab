@@ -2,8 +2,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LoadScript } from "@react-google-maps/api";
 import { DeliveryProvider } from "./context/DeliveryContext";
 import MapView from "./components/MapView";
+import DesignPlan from "./components/DesignPlan";
 import DeliveryForm from "./components/DeliveryForm";
-import ReviewPage from "./components/ReviewPage"; // ADD THIS
+import ReviewPage from "./components/ReviewPage";
 import "./App.css";
 
 function App() {
@@ -17,8 +18,9 @@ function App() {
           <div className="App">
             <Routes>
               <Route path="/" element={<MapView />} />
+              <Route path="/design-plan" element={<DesignPlan />} />
               <Route path="/form" element={<DeliveryForm />} />
-              <Route path="/review" element={<ReviewPage />} /> {/* ADD THIS */}
+              <Route path="/review" element={<ReviewPage />} />
             </Routes>
           </div>
         </BrowserRouter>

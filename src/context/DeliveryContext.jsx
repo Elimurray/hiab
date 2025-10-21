@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useMemo } from "react";
 
 const DeliveryContext = createContext();
 
@@ -11,13 +11,21 @@ export const useDelivery = () => {
 };
 
 export const DeliveryProvider = ({ children }) => {
-  // Store markers
-  const [markers, setMarkers] = useState({
-    truck: null,
-    drop: null,
+  // Store map screenshot (base64)
+  const [mapScreenshot, setMapScreenshot] = useState(null);
+
+  // Store design plan annotations
+  const [designPlan, setDesignPlan] = useState({
+    truck: null, // { x, y }
+    cones: [], // [{ id, x, y }]
+    lines: [], // [{ id, points: [{ x, y }], color }]
+    dropZones: [], // [{ id, number, x, y }]
+    loadArrow: null, // { x, y, rotation }
+    driver: null, // { x, y }
+    windArrow: null, // { x, y, rotation }
   });
 
-  // Store map center - ADD THIS
+  // Store map center
   const [mapCenter, setMapCenter] = useState({
     lat: -37.787,
     lng: 175.2793,
@@ -35,12 +43,17 @@ export const DeliveryProvider = ({ children }) => {
     specialInstructions: "",
   });
 
-  // Update markers
-  const updateMarkers = (truck, drop) => {
-    setMarkers({ truck, drop });
+  // Update map screenshot
+  const updateMapScreenshot = (screenshot) => {
+    setMapScreenshot(screenshot);
   };
 
-  // Update map center - ADD THIS
+  // Update design plan
+  const updateDesignPlan = (newPlan) => {
+    setDesignPlan((prev) => ({ ...prev, ...newPlan }));
+  };
+
+  // Update map center
   const updateMapCenter = (lat, lng) => {
     setMapCenter({ lat, lng });
   };
@@ -52,7 +65,16 @@ export const DeliveryProvider = ({ children }) => {
 
   // Reset all data
   const resetAll = () => {
-    setMarkers({ truck: null, drop: null });
+    setMapScreenshot(null);
+    setDesignPlan({
+      truck: null,
+      cones: [],
+      lines: [],
+      dropZones: [],
+      loadArrow: null,
+      driver: null,
+      windArrow: null,
+    });
     setMapCenter({ lat: -37.787, lng: 175.2793 });
     setFormData({
       driverName: "",
@@ -66,15 +88,21 @@ export const DeliveryProvider = ({ children }) => {
     });
   };
 
-  const value = {
-    markers,
-    mapCenter, // ADD THIS
-    formData,
-    updateMarkers,
-    updateMapCenter, // ADD THIS
-    updateFormData,
-    resetAll,
-  };
+  // Memoize context value to prevent unnecessary re-renders
+  const value = useMemo(
+    () => ({
+      mapScreenshot,
+      designPlan,
+      mapCenter,
+      formData,
+      updateMapScreenshot,
+      updateDesignPlan,
+      updateMapCenter,
+      updateFormData,
+      resetAll,
+    }),
+    [mapScreenshot, designPlan, mapCenter, formData]
+  );
 
   return (
     <DeliveryContext.Provider value={value}>
