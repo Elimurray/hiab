@@ -7,17 +7,15 @@
 .App {
   min-height: 100vh;
   padding: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: rgb(244, 244, 244);
 }
 
 h1 {
-  color: white;
   text-align: center;
   margin-top: 50px;
 }
 
 p {
-  color: white;
   text-align: center;
   margin-top: 20px;
   font-size: 1.2rem;

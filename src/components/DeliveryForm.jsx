@@ -76,8 +76,7 @@ const DeliveryForm = () => {
       // Save form data to context
       updateFormData(formData);
       console.log("Form data saved to context:", formData);
-      // TODO: Navigate to review page
-      alert("Form validated! Moving to review page...");
+      navigate("/review");
     }
   };
 

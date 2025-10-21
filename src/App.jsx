@@ -3,6 +3,7 @@ import { LoadScript } from "@react-google-maps/api";
 import { DeliveryProvider } from "./context/DeliveryContext";
 import MapView from "./components/MapView";
 import DeliveryForm from "./components/DeliveryForm";
+import ReviewPage from "./components/ReviewPage"; // ADD THIS
 import "./App.css";
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
             <Routes>
               <Route path="/" element={<MapView />} />
               <Route path="/form" element={<DeliveryForm />} />
+              <Route path="/review" element={<ReviewPage />} /> {/* ADD THIS */}
             </Routes>
           </div>
         </BrowserRouter>

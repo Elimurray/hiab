@@ -10,13 +10,11 @@
 }
 
 .form-header h1 {
-  color: white;
   font-size: 2.5rem;
   margin-bottom: 10px;
 }
 
 .form-header p {
-  color: rgba(255, 255, 255, 0.9);
   font-size: 1.1rem;
 }
 
@@ -125,6 +123,10 @@
   border-top: 2px solid #e5e7eb;
 }
 
+.form-actions .btn {
+  flex: 1;
+}
+
 .btn {
   padding: 14px 28px;
   font-size: 1rem;
@@ -148,14 +150,12 @@
 .btn-primary {
   background: #10b981;
   color: white;
-  flex: 1;
 }
 
 .btn-primary:hover {
   background: #059669;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .form-row {
     grid-template-columns: 1fr;
@@ -163,9 +163,13 @@
 
   .form-actions {
     flex-direction: column;
+    width: 100%;
   }
 
-  .btn {
-    width: 100%;
+  .form-actions .btn {
+    flex: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
   }
 }

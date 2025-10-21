@@ -10,13 +10,11 @@
 }
 
 .map-header h1 {
-  color: white;
   font-size: 2.5rem;
   margin-bottom: 10px;
 }
 
 .map-header p {
-  color: rgba(255, 255, 255, 0.9);
   font-size: 1.1rem;
 }
 
@@ -88,7 +86,6 @@
 
 .btn-secondary {
   background: white;
-  color: #4b5563;
   border: 2px solid #d1d5db;
 }
 
@@ -111,4 +108,33 @@
   background: #d1d5db;
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+@media (max-width: 768px) {
+  .button-container {
+    grid-template-columns: 1fr;
+  }
+
+  .button-container {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .button-container .btn {
+    flex: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+  }
+
+  .map-wrapper {
+    height: 500px;
+  }
+
+  .map-view-container {
+    padding: 10px;
+  }
+  .map-wrapper > div {
+    height: 100% !important;
+  }
 }
