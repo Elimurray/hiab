@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { GoogleMap, Marker } from "@react-google-maps/api";
 import { useDelivery } from "../context/DeliveryContext";
@@ -10,6 +10,7 @@ const MapView = () => {
 
   const [truckMarker, setTruckMarker] = useState(markers.truck);
   const [dropMarker, setDropMarker] = useState(markers.drop);
+  const [error, setError] = useState(null); // State for geolocation errors
 
   // Reference map instance
   const mapRef = useRef(null);
@@ -50,15 +51,63 @@ const MapView = () => {
     [truckMarker, dropMarker]
   );
 
+  // Function to get current location
+  const getCurrentLocation = useCallback(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          const currentLocation = { lat: latitude, lng: longitude };
+
+          // Update map center to current location only if not already set
+          if (!truckMarker && !dropMarker) {
+            updateMapCenter(latitude, longitude);
+            console.log("Current location set as map center:", currentLocation);
+          }
+
+          // Pan map to current location
+          if (mapRef.current) {
+            mapRef.current.panTo(currentLocation);
+          }
+
+          setError(null); // Clear any previous errors
+        },
+        (err) => {
+          // Handle geolocation errors
+          setError(
+            err.message || "Unable to retrieve location. Please try again."
+          );
+          console.error("Geolocation error:", err);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000, // 10 seconds timeout
+          maximumAge: 0, // No cached position
+        }
+      );
+    } else {
+      setError("Geolocation is not supported by this browser.");
+      console.error("Geolocation not supported");
+    }
+  }, [truckMarker, dropMarker, updateMapCenter]);
+
+  // Fetch current location only once on mount
+  useEffect(() => {
+    getCurrentLocation();
+  }, []); // Empty dependency array to run only on mount
+
   const resetMarkers = () => {
     setTruckMarker(null);
     setDropMarker(null);
+    setError(null); // Clear error on reset
     console.log("Markers reset");
+    // Optionally re-center map to current location
+    getCurrentLocation();
   };
 
   const handleContinue = () => {
     if (truckMarker && dropMarker) {
-      // Get the CURRENT center of the map before navigating
+      // Get the current center of the map before navigating
       if (mapRef.current) {
         const center = mapRef.current.getCenter();
         const currentLat = center.lat();
@@ -86,7 +135,8 @@ const MapView = () => {
 
       <div className="instructions">
         <div className="instruction-box">
-          <strong>Instructions:</strong> Click on the map to place markers
+          <strong>Instructions:</strong> Click on the map to place markers or
+          use your current location.
           <div className="marker-legend">
             <div className="legend-item">
               <div className="legend-color blue"></div>
@@ -100,14 +150,23 @@ const MapView = () => {
         </div>
       </div>
 
+      {error && (
+        <div
+          className="error-message"
+          style={{ color: "red", margin: "10px 0" }}
+        >
+          {error}
+        </div>
+      )}
+
       <div className="map-wrapper">
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
-          center={mapCenter} // Load from context
+          center={mapCenter}
           zoom={18}
           options={mapOptions}
           onClick={onMapClick}
-          onLoad={onMapLoad} // ADD THIS - capture map reference
+          onLoad={onMapLoad}
         >
           {truckMarker && (
             <Marker
@@ -142,6 +201,9 @@ const MapView = () => {
       </div>
 
       <div className="button-container">
+        <button className="btn btn-secondary" onClick={getCurrentLocation}>
+          Use Current Location
+        </button>
         <button className="btn btn-secondary" onClick={resetMarkers}>
           Reset Markers
         </button>
