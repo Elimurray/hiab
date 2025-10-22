@@ -10,7 +10,13 @@ import "./DesignPlan.css";
 
 const DesignPlan = () => {
   const navigate = useNavigate();
-  const { mapScreenshot, designPlan, updateDesignPlan } = useDelivery();
+  const {
+    mapScreenshot,
+    designPlan,
+    updateDesignPlan,
+    undoDesignPlan,
+    canUndo,
+  } = useDelivery();
   const canvasRef = useRef(null);
   const [tool, setTool] = useState(null); // Current tool: "truck", "cone", "line", "dropZone", "loadArrow", "driver", "windArrow"
   const [lineColor, setLineColor] = useState("#000000"); // Line color
@@ -549,6 +555,13 @@ const DesignPlan = () => {
             </div>
           </div>
           <div className="focused-footer">
+            <button
+              className="btn btn-secondary"
+              onClick={undoDesignPlan}
+              disabled={!canUndo}
+            >
+              ↩️ Undo
+            </button>
             <button className="btn btn-secondary" onClick={resetDesignPlan}>
               🔄 Reset
             </button>

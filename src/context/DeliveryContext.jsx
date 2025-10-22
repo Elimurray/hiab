@@ -25,6 +25,8 @@ export const DeliveryProvider = ({ children }) => {
     windArrow: null, // { x, y, rotation }
   });
 
+  const [designPlanHistory, setDesignPlanHistory] = useState([]);
+
   // Store map center
   const [mapCenter, setMapCenter] = useState({
     lat: -37.787,
@@ -50,6 +52,7 @@ export const DeliveryProvider = ({ children }) => {
 
   // Update design plan
   const updateDesignPlan = (newPlan) => {
+    setDesignPlanHistory((prev) => [...prev, designPlan]); // Save current state
     setDesignPlan((prev) => ({ ...prev, ...newPlan }));
   };
 
@@ -61,6 +64,14 @@ export const DeliveryProvider = ({ children }) => {
   // Update form data
   const updateFormData = (data) => {
     setFormData(data);
+  };
+  // Add undo function
+  const undoDesignPlan = () => {
+    if (designPlanHistory.length === 0) return;
+
+    const previousState = designPlanHistory[designPlanHistory.length - 1];
+    setDesignPlan(previousState);
+    setDesignPlanHistory((prev) => prev.slice(0, -1)); // Remove last history entry
   };
 
   // Reset all data
@@ -86,6 +97,7 @@ export const DeliveryProvider = ({ children }) => {
       accessNotes: "",
       specialInstructions: "",
     });
+    setDesignPlanHistory([]);
   };
 
   // Memoize context value to prevent unnecessary re-renders
@@ -100,8 +112,10 @@ export const DeliveryProvider = ({ children }) => {
       updateMapCenter,
       updateFormData,
       resetAll,
+      undoDesignPlan,
+      canUndo: designPlanHistory.length > 0,
     }),
-    [mapScreenshot, designPlan, mapCenter, formData]
+    [mapScreenshot, designPlan, mapCenter, formData, designPlanHistory]
   );
 
   return (
