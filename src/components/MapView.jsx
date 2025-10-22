@@ -79,18 +79,34 @@ const MapView = () => {
     if (mapRef.current) {
       try {
         const mapElement = document.querySelector(".map-wrapper > div");
+
         if (mapElement) {
+          // 1️⃣ Find and mark Google controls to ignore
+          const googleControls = mapElement.querySelectorAll(
+            ".gmnoprint, .gm-style-cc, .gm-style button, .gm-fullscreen-control"
+          );
+          googleControls.forEach((el) =>
+            el.setAttribute("data-html2canvas-ignore", "true")
+          );
+
+          // 2️⃣ Capture clean map screenshot
           const canvas = await html2canvas(mapElement, {
             useCORS: true,
             allowTaint: true,
             backgroundColor: "#ffffff",
             scale: 2,
           });
+
+          // 3️⃣ Restore controls (optional, for safety)
+          googleControls.forEach((el) =>
+            el.removeAttribute("data-html2canvas-ignore")
+          );
+
+          // 4️⃣ Save image + map center
           const screenshot = canvas.toDataURL("image/png");
           updateMapScreenshot(screenshot);
           console.log("Map screenshot captured");
 
-          // Save current map center
           const center = mapRef.current.getCenter();
           updateMapCenter(center.lat(), center.lng());
           console.log("Map center saved:", {
