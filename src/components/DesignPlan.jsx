@@ -332,12 +332,60 @@ const DesignPlan = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Create a download link
-    const link = document.createElement("a");
-    const timestamp = new Date().toISOString().split("T")[0];
-    link.download = `hiab-site-plan-${timestamp}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
+    // Convert canvas to blob
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+
+      const timestamp = new Date().toISOString().split("T")[0];
+
+      // Check if we can use the native share API (works on iOS)
+      if (
+        navigator.share &&
+        /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+      ) {
+        const file = new File([blob], `hiab-site-plan-${timestamp}.png`, {
+          type: "image/png",
+        });
+
+        navigator
+          .share({
+            files: [file],
+            title: "Hiab Site Plan",
+            text: "Site plan design",
+          })
+          .catch((error) => {
+            // If share fails, fall back to opening in new tab
+            console.log("Share failed:", error);
+            openImageInNewTab(canvas);
+          });
+      } else {
+        // Desktop: use download link
+        const link = document.createElement("a");
+        link.download = `hiab-site-plan-${timestamp}.png`;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        URL.revokeObjectURL(link.href);
+      }
+    }, "image/png");
+  };
+
+  // Fallback: open image in new tab for long-press save
+  const openImageInNewTab = (canvas) => {
+    const dataURL = canvas.toDataURL("image/png");
+    const newWindow = window.open();
+    if (newWindow) {
+      newWindow.document.write(`
+      <html>
+        <head><title>Hiab Site Plan</title></head>
+        <body style="margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#000;">
+          <img src="${dataURL}" style="max-width:100%;height:auto;" alt="Site Plan"/>
+          <p style="position:fixed;bottom:20px;color:white;text-align:center;width:100%;">
+            Long-press the image and select "Save Image" or "Add to Photos"
+          </p>
+        </body>
+      </html>
+    `);
+    }
   };
 
   return (
