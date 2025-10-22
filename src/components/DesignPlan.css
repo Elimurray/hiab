@@ -590,4 +590,42 @@
   .btn-text {
     display: inline;
   }
+
+  .legend-items {
+    display: none;
+  }
+  .bottom-container {
+    height: 100px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 12px 20px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-top: 2px solid #e5e7eb;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .focused-footer {
+    position: relative;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    background: transparent;
+    order: 1; /* Keep footer buttons on the left */
+  }
+
+  .rotation-panel {
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    background: transparent;
+    order: 2; /* Rotation panel on the right */
+  }
+
+  .mobile-legend {
+    display: none; /* Hide legend on desktop */
+  }
 }

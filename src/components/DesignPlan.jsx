@@ -379,7 +379,7 @@ const DesignPlan = () => {
                 title="Cone"
               >
                 <span className="btn-text">Cone</span>
-                <span className="btn-icon">🚧</span>
+                <span className="btn-icon">🗼</span>
               </button>
               <button
                 className={`btn btn-tool ${tool === "line" ? "active" : ""}`}
@@ -565,7 +565,7 @@ const DesignPlan = () => {
             <div className="legend-title">Legend:</div>
             <div className="legend-items">
               <span className="legend-item">🚛 Truck</span>
-              <span className="legend-item">🚧 Cone</span>
+              <span className="legend-item">🗼 Cone</span>
               <span className="legend-item">✏️ Line</span>
               <span className="legend-item">📍 Drop Zone</span>
               <span className="legend-item">⬆️ Load Arrow</span>
