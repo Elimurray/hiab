@@ -155,7 +155,225 @@
   margin-bottom: 20px;
 }
 
+/* Focused mode toolbar at the top */
+.focused-toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 2px solid #e5e7eb;
+  z-index: 1000;
+  padding: 12px 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.toolbar-content {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.line-color-select {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: white;
+  font-size: 14px;
+}
+
+.rotation-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  background: #f3f4f6;
+  border-radius: 6px;
+}
+
+.rotation-control label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.rotation-control input {
+  width: 70px;
+  padding: 4px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.btn-close {
+  background: #ef4444;
+  color: white;
+  margin-left: auto;
+}
+
+.btn-close:hover {
+  background: #dc2626;
+}
+
+/* Focused canvas wrapper */
+.canvas-wrapper.focused {
+  position: fixed;
+  top: 70px;
+  left: 0;
+  right: 0;
+  bottom: 60px;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.canvas-wrapper.focused canvas {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.focused-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 2px solid #e5e7eb;
+  z-index: 1000;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.canvas-wrapper:not(.focused) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.canvas-wrapper:not(.focused) canvas {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  transition: transform 0.2s ease;
+}
+
+.canvas-wrapper:not(.focused) canvas:hover {
+  transform: scale(1.01);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-tool.active {
+  background: #2563eb;
+  color: white;
+  border-color: #1d4ed8;
+}
+
+.btn-tool {
+  transition: all 0.2s ease;
+}
+
+.btn-tool:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.rotation-panel {
+  position: relative;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid #e5e7eb;
+  z-index: 1000;
+  padding: 12px 20px;
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.rotation-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.rotation-item label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.rotation-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-rotate {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-rotate:hover {
+  background: #2563eb;
+  transform: scale(1.05);
+}
+
+.btn-rotate:active {
+  transform: scale(0.95);
+}
+
+.rotation-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  min-width: 50px;
+  text-align: center;
+}
+
+.bottom-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+}
+
 @media (max-width: 768px) {
+  /* Normal mode (non-focused) */
   .button-container {
     flex-direction: column;
     width: 100%;
@@ -178,16 +396,197 @@
     width: 100%;
   }
 
-  .canvas-wrapper {
-    height: 500px;
+  .canvas-wrapper:not(.focused) {
+    padding: 10px;
+    margin: 10px 0;
   }
 
-  .canvas-wrapper canvas {
-    height: 100% !important;
-    width: 100% !important;
+  .canvas-wrapper:not(.focused) canvas {
+    max-width: 100%;
+    height: auto;
+    width: 100%;
   }
 
   .design-plan-container {
     padding: 10px;
+  }
+
+  .design-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .design-header p {
+    font-size: 1rem;
+  }
+
+  /* Focused mode - Icon-only toolbar */
+  .focused-toolbar {
+    padding-top: 40px;
+    top: 0;
+    overflow: hidden;
+  }
+
+  .toolbar-content {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    width: 100%;
+    overflow: visible;
+  }
+
+  /* Hide text, show only icons on mobile */
+  .toolbar-content .btn-tool .btn-text,
+  .toolbar-content .btn-secondary .btn-text,
+  .toolbar-content .btn-close .btn-text {
+    display: none;
+  }
+
+  .toolbar-content .btn-tool .btn-icon,
+  .toolbar-content .btn-secondary .btn-icon,
+  .toolbar-content .btn-close .btn-icon {
+    display: inline;
+    font-size: 25px;
+  }
+
+  .toolbar-content .btn-tool,
+  .toolbar-content .btn-secondary,
+  .toolbar-content .btn-close {
+    min-width: unset;
+    width: 100%;
+    min-height: 42px;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Canvas takes all remaining space */
+  .canvas-wrapper.focused {
+    position: fixed;
+    top: 60px;
+    bottom: 120px; /* Fixed to account for footer (~75px) + legend (45px) */
+    left: 0;
+    right: 0;
+    padding: 8px;
+    padding-bottom: 0;
+  }
+
+  .canvas-wrapper.focused canvas {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain;
+  }
+
+  /* Focused footer - base layer */
+  .focused-footer {
+    position: relative; /* Stays in bottom-container flow */
+    padding: 10px;
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-top: 2px solid #e5e7eb;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1001; /* Above rotation-panel and legend */
+  }
+
+  .focused-footer .btn {
+    flex: 1;
+    font-size: 20px;
+    padding: 12px;
+  }
+
+  /* Mobile legend - directly above footer, in bottom-container flow */
+  .mobile-legend {
+    position: relative; /* Stays in document flow within bottom-container */
+    background: rgba(249, 250, 251, 0.98);
+    backdrop-filter: blur(10px);
+    padding: 8px 10px;
+    border-top: 1px solid #e5e7eb;
+    z-index: 999; /* Below rotation-panel */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    min-height: 45px;
+    box-sizing: border-box;
+  }
+
+  .legend-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 4px;
+  }
+
+  .legend-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .legend-item {
+    font-size: 18px;
+    color: #374151;
+    white-space: nowrap;
+  }
+
+  /* Rotation panel - relative, above legend in bottom-container */
+  .rotation-panel {
+    position: relative; /* Stays in document flow within bottom-container */
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid #e5e7eb;
+    z-index: 1000; /* Above legend (999), below footer (1001) */
+    padding: 12px 10px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    min-height: 80px;
+    box-sizing: border-box;
+  }
+
+  .rotation-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .rotation-item label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .rotation-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .btn-rotate {
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
+  }
+
+  .rotation-value {
+    font-size: 16px;
+    min-width: 50px;
+  }
+}
+
+/* Desktop - show text, hide icons */
+@media (min-width: 769px) {
+  .btn-icon {
+    display: none;
+  }
+
+  .btn-text {
+    display: inline;
   }
 }

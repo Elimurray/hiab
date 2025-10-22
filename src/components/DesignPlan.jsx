@@ -19,6 +19,7 @@ const DesignPlan = () => {
   const [dropZoneCount, setDropZoneCount] = useState(1); // Counter for numbered drop zones
   const [error, setError] = useState(null);
   const iconImagesRef = useRef({}); // Store preloaded icon Image objects
+  const [isFocused, setIsFocused] = useState(false);
 
   // Define icons
   const icons = {
@@ -43,6 +44,18 @@ const DesignPlan = () => {
       };
     });
   }, []);
+
+  // Prevent scrolling when focused
+  useEffect(() => {
+    if (isFocused) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isFocused]);
 
   // Initialize canvas and redraw when mapScreenshot or designPlan changes
   useEffect(() => {
@@ -124,7 +137,13 @@ const DesignPlan = () => {
 
       // Draw truck
       if (designPlan.truck) {
-        drawIcon("truck", designPlan.truck.x, designPlan.truck.y, 100, 0);
+        drawIcon(
+          "truck",
+          designPlan.truck.x,
+          designPlan.truck.y,
+          100,
+          designPlan.truck.rotation || 0
+        );
       }
 
       // Draw cones
@@ -201,7 +220,7 @@ const DesignPlan = () => {
           color: lineColor,
         });
       } else if (tool === "truck" && !designPlan.truck) {
-        updateDesignPlan({ truck: { x, y } });
+        updateDesignPlan({ truck: { x, y, rotation: 0 } });
       } else if (tool === "cone") {
         updateDesignPlan({
           cones: [...designPlan.cones, { id: Date.now(), x, y }],
@@ -298,124 +317,264 @@ const DesignPlan = () => {
 
   return (
     <div className="design-plan-container">
-      <div className="design-header">
-        <h1>Hiab Site Planner - Design Plan</h1>
-        <p>Step 2: Add annotations to the site plan</p>
-      </div>
-
-      <div className="instructions">
-        <div className="instruction-box">
-          <strong>Instructions:</strong> Select a tool and click on the canvas
-          to place items or draw lines. Adjust arrow rotations as needed.
-        </div>
-      </div>
-
-      {error && <div className="error-message">{error}</div>}
-
-      <div className="toolbar">
-        <button
-          className={`btn btn-tool ${tool === "truck" ? "active" : ""}`}
-          onClick={() => setTool("truck")}
-        >
-          Truck
-        </button>
-        <button
-          className={`btn btn-tool ${tool === "cone" ? "active" : ""}`}
-          onClick={() => setTool("cone")}
-        >
-          Cone
-        </button>
-        <button
-          className={`btn btn-tool ${tool === "line" ? "active" : ""}`}
-          onClick={() => setTool("line")}
-        >
-          Draw Line
-        </button>
-        <select
-          value={lineColor}
-          onChange={(e) => setLineColor(e.target.value)}
-          disabled={tool !== "line"}
-        >
-          <option value="#000000">Black</option>
-          <option value="#FF0000">Red</option>
-          <option value="#00FF00">Green</option>
-          <option value="#0000FF">Blue</option>
-        </select>
-        <button
-          className={`btn btn-tool ${tool === "dropZone" ? "active" : ""}`}
-          onClick={() => setTool("dropZone")}
-        >
-          Drop Zone
-        </button>
-        <button
-          className={`btn btn-tool ${tool === "loadArrow" ? "active" : ""}`}
-          onClick={() => setTool("loadArrow")}
-        >
-          Load Arrow
-        </button>
-        <button
-          className={`btn btn-tool ${tool === "driver" ? "active" : ""}`}
-          onClick={() => setTool("driver")}
-        >
-          Driver
-        </button>
-        <button
-          className={`btn btn-tool ${tool === "windArrow" ? "active" : ""}`}
-          onClick={() => setTool("windArrow")}
-        >
-          Wind Arrow
-        </button>
-        {tool === "loadArrow" && designPlan.loadArrow && (
-          <div>
-            <label>Load Arrow Rotation:</label>
-            <input
-              type="number"
-              value={designPlan.loadArrow.rotation || 0}
-              onChange={(e) =>
-                handleRotationChange("loadArrow", Number(e.target.value))
-              }
-              min="0"
-              max="360"
-            />
+      {!isFocused && (
+        <>
+          <div className="design-header">
+            <h1>Hiab Site Planner - Design Plan</h1>
+            <p>Step 2: Add annotations to the site plan</p>
           </div>
-        )}
-        {tool === "windArrow" && designPlan.windArrow && (
-          <div>
-            <label>Wind Arrow Rotation:</label>
-            <input
-              type="number"
-              value={designPlan.windArrow.rotation || 0}
-              onChange={(e) =>
-                handleRotationChange("windArrow", Number(e.target.value))
-              }
-              min="0"
-              max="360"
-            />
-          </div>
-        )}
-      </div>
 
-      <div className="canvas-wrapper">
+          <div className="instructions">
+            <div className="instruction-box">
+              <strong>Instructions:</strong> Click on the map to enter focus
+              mode. Select a tool and click on the canvas to place items or draw
+              lines. Adjust arrow rotations as needed.
+            </div>
+          </div>
+
+          {error && <div className="error-message">{error}</div>}
+        </>
+      )}
+
+      {isFocused && (
+        <>
+          <div className="focused-toolbar">
+            <div className="toolbar-content">
+              <button
+                className={`btn btn-tool ${tool === "truck" ? "active" : ""}`}
+                onClick={() => setTool("truck")}
+                title="Truck"
+              >
+                <span className="btn-text">Truck</span>
+                <span className="btn-icon">🚛</span>
+              </button>
+              <button
+                className={`btn btn-tool ${tool === "cone" ? "active" : ""}`}
+                onClick={() => setTool("cone")}
+                title="Cone"
+              >
+                <span className="btn-text">Cone</span>
+                <span className="btn-icon">🚧</span>
+              </button>
+              <button
+                className={`btn btn-tool ${tool === "line" ? "active" : ""}`}
+                onClick={() => setTool("line")}
+                title="Draw Line"
+              >
+                <span className="btn-text">Draw Line</span>
+                <span className="btn-icon">✏️</span>
+              </button>
+              {/* <select
+                value={lineColor}
+                onChange={(e) => setLineColor(e.target.value)}
+                disabled={tool !== "line"}
+                className="line-color-select"
+                title="Line Color"
+              >
+                <option value="#000000">Black</option>
+                <option value="#FF0000">Red</option>
+                <option value="#00FF00">Green</option>
+                <option value="#0000FF">Blue</option>
+              </select> */}
+              <button
+                className={`btn btn-tool ${
+                  tool === "dropZone" ? "active" : ""
+                }`}
+                onClick={() => setTool("dropZone")}
+                title="Drop Zone"
+              >
+                <span className="btn-text">Drop Zone</span>
+                <span className="btn-icon">📍</span>
+              </button>
+              <button
+                className={`btn btn-tool ${
+                  tool === "loadArrow" ? "active" : ""
+                }`}
+                onClick={() => setTool("loadArrow")}
+                title="Load Arrow"
+              >
+                <span className="btn-text">Load Arrow</span>
+                <span className="btn-icon">⬆️</span>
+              </button>
+              <button
+                className={`btn btn-tool ${tool === "driver" ? "active" : ""}`}
+                onClick={() => setTool("driver")}
+                title="Driver"
+              >
+                <span className="btn-text">Driver</span>
+                <span className="btn-icon">👤</span>
+              </button>
+              <button
+                className={`btn btn-tool ${
+                  tool === "windArrow" ? "active" : ""
+                }`}
+                onClick={() => setTool("windArrow")}
+                title="Wind Arrow"
+              >
+                <span className="btn-text">Wind Arrow</span>
+                <span className="btn-icon">💨</span>
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      <div className={`canvas-wrapper ${isFocused ? "focused" : ""}`}>
         <canvas
           ref={canvasRef}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
-          style={{ border: "1px solid #ccc" }}
+          onClick={() => !isFocused && setIsFocused(true)}
+          style={{
+            border: "1px solid #ccc",
+            cursor: isFocused ? "crosshair" : "pointer",
+          }}
         />
       </div>
+      {isFocused && (
+        <div className="bottom-container">
+          {((tool === "loadArrow" && designPlan.loadArrow) ||
+            (tool === "windArrow" && designPlan.windArrow) ||
+            (tool === "truck" && designPlan.truck)) && (
+            <div className="rotation-panel">
+              {tool === "truck" && designPlan.truck && (
+                <div className="rotation-item">
+                  <label>Truck Direction</label>
+                  <div className="rotation-buttons">
+                    <button
+                      className="btn-rotate"
+                      onClick={() =>
+                        handleRotationChange(
+                          "truck",
+                          ((designPlan.truck.rotation || 0) - 22.5 + 360) % 360
+                        )
+                      }
+                    >
+                      ↶
+                    </button>
+                    <span className="rotation-value">
+                      {designPlan.truck.rotation || 0}°
+                    </span>
+                    <button
+                      className="btn-rotate"
+                      onClick={() =>
+                        handleRotationChange(
+                          "truck",
+                          ((designPlan.truck.rotation || 0) + 22.5) % 360
+                        )
+                      }
+                    >
+                      ↷
+                    </button>
+                  </div>
+                </div>
+              )}
+              {tool === "loadArrow" && designPlan.loadArrow && (
+                <div className="rotation-item">
+                  <label>Load Arrow Direction</label>
+                  <div className="rotation-buttons">
+                    <button
+                      className="btn-rotate"
+                      onClick={() =>
+                        handleRotationChange(
+                          "loadArrow",
+                          (designPlan.loadArrow.rotation - 22.5 + 360) % 360
+                        )
+                      }
+                    >
+                      ↶
+                    </button>
+                    <span className="rotation-value">
+                      {designPlan.loadArrow.rotation}°
+                    </span>
+                    <button
+                      className="btn-rotate"
+                      onClick={() =>
+                        handleRotationChange(
+                          "loadArrow",
+                          (designPlan.loadArrow.rotation + 22.5) % 360
+                        )
+                      }
+                    >
+                      ↷
+                    </button>
+                  </div>
+                </div>
+              )}
+              {tool === "windArrow" && designPlan.windArrow && (
+                <div className="rotation-item">
+                  <label>Wind Arrow Direction</label>
+                  <div className="rotation-buttons">
+                    <button
+                      className="btn-rotate"
+                      onClick={() =>
+                        handleRotationChange(
+                          "windArrow",
+                          (designPlan.windArrow.rotation - 22.5 + 360) % 360
+                        )
+                      }
+                    >
+                      ↶
+                    </button>
+                    <span className="rotation-value">
+                      {designPlan.windArrow.rotation}°
+                    </span>
+                    <button
+                      className="btn-rotate"
+                      onClick={() =>
+                        handleRotationChange(
+                          "windArrow",
+                          (designPlan.windArrow.rotation + 22.5) % 360
+                        )
+                      }
+                    >
+                      ↷
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          <div className="mobile-legend">
+            <div className="legend-title">Legend:</div>
+            <div className="legend-items">
+              <span className="legend-item">🚛 Truck</span>
+              <span className="legend-item">🚧 Cone</span>
+              <span className="legend-item">✏️ Line</span>
+              <span className="legend-item">📍 Drop Zone</span>
+              <span className="legend-item">⬆️ Load Arrow</span>
+              <span className="legend-item">👤 Driver</span>
+              <span className="legend-item">💨 Wind</span>
+            </div>
+          </div>
+          <div className="focused-footer">
+            <button className="btn btn-secondary" onClick={resetDesignPlan}>
+              🔄 Reset
+            </button>
+            <button
+              className="btn btn-close"
+              onClick={() => setIsFocused(false)}
+            >
+              ✖️ Exit
+            </button>
+          </div>
+        </div>
+      )}
 
-      <div className="button-container">
-        <button className="btn btn-secondary" onClick={() => navigate("/")}>
-          ← Back to Map
-        </button>
-        <button className="btn btn-secondary" onClick={resetDesignPlan}>
-          Reset Design
-        </button>
-        <button className="btn btn-primary" onClick={handleContinue}>
-          Continue to Form →
-        </button>
-      </div>
+      {!isFocused && (
+        <div className="button-container">
+          <button className="btn btn-secondary" onClick={() => navigate("/")}>
+            ← Back to Map
+          </button>
+          <button className="btn btn-secondary" onClick={resetDesignPlan}>
+            Reset Design
+          </button>
+          <button className="btn btn-primary" onClick={handleContinue}>
+            Continue to Form →
+          </button>
+        </div>
+      )}
     </div>
   );
 };
