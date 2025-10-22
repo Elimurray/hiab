@@ -6,6 +6,7 @@ import coneIcon from "../utils/cone.svg";
 import driverIcon from "../utils/driver.svg";
 import loadArrowIcon from "../utils/loadArrow.svg";
 import windArrowIcon from "../utils/windArrow.svg";
+import siteIcon from "../utils/site.svg";
 import "./DesignPlan.css";
 
 const DesignPlan = () => {
@@ -34,6 +35,7 @@ const DesignPlan = () => {
     driver: driverIcon,
     loadArrow: loadArrowIcon,
     windArrow: windArrowIcon,
+    site: siteIcon,
   };
 
   // Preload icons
@@ -140,6 +142,17 @@ const DesignPlan = () => {
         ctx.drawImage(icon, -size / 2, -size / 2, size, size);
         ctx.restore();
       };
+
+      // Draw site
+      if (designPlan.site) {
+        drawIcon(
+          "site",
+          designPlan.site.x,
+          designPlan.site.y,
+          designPlan.site.size || 200,
+          designPlan.site.rotation || 0
+        );
+      }
 
       // Draw truck
       if (designPlan.truck) {
@@ -256,6 +269,15 @@ const DesignPlan = () => {
         updateDesignPlan({
           windArrow: { x, y, rotation: designPlan.windArrow?.rotation || 0 },
         });
+      } else if (tool === "site") {
+        updateDesignPlan({
+          site: {
+            x,
+            y,
+            rotation: designPlan.site?.rotation || 0,
+            size: designPlan.site?.size || 200,
+          },
+        });
       }
       redrawCanvas();
     },
@@ -300,13 +322,13 @@ const DesignPlan = () => {
     redrawCanvas();
   };
 
-  // Handle size for truck
-  const handleSizeChange = (delta) => {
-    const currentSize = designPlan.truck?.size || 100;
-    const newSize = Math.max(50, Math.min(200, currentSize + delta)); // Clamp between 50 and 200
+  // Handle size for truck and site
+  const handleSizeChange = (type, delta) => {
+    const currentSize = designPlan[type]?.size || 100;
+    const newSize = Math.max(150, Math.min(400, currentSize + delta)); // Clamp between 50 and 300
     updateDesignPlan({
-      truck: {
-        ...designPlan.truck,
+      [type]: {
+        ...designPlan[type],
         size: newSize,
       },
     });
@@ -317,6 +339,7 @@ const DesignPlan = () => {
   const resetDesignPlan = () => {
     updateDesignPlan({
       truck: null,
+      site: null,
       cones: [],
       lines: [],
       dropZones: [],
@@ -505,6 +528,14 @@ const DesignPlan = () => {
                 <span className="btn-text">Wind Arrow</span>
                 <span className="btn-icon">💨</span>
               </button>
+              <button
+                className={`btn btn-tool ${tool === "site" ? "active" : ""}`}
+                onClick={() => setTool("site")}
+                title="Site"
+              >
+                <span className="btn-text">Site</span>
+                <span className="btn-icon">🏢</span>
+              </button>
             </div>
           </div>
         </>
@@ -527,6 +558,7 @@ const DesignPlan = () => {
         <div className="bottom-container">
           {((tool === "loadArrow" && designPlan.loadArrow) ||
             (tool === "windArrow" && designPlan.windArrow) ||
+            (tool === "site" && designPlan.site) ||
             (tool === "truck" && designPlan.truck)) && (
             <div className="rotation-panel">
               {tool === "truck" && designPlan.truck && (
@@ -567,7 +599,7 @@ const DesignPlan = () => {
                     <div className="rotation-buttons">
                       <button
                         className="btn-rotate"
-                        onClick={() => handleSizeChange(-10)}
+                        onClick={() => handleSizeChange("truck", -10)}
                       >
                         −
                       </button>
@@ -576,7 +608,61 @@ const DesignPlan = () => {
                       </span>
                       <button
                         className="btn-rotate"
-                        onClick={() => handleSizeChange(10)}
+                        onClick={() => handleSizeChange("truck", 10)}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+              {tool === "site" && designPlan.site && (
+                <>
+                  <div className="rotation-item">
+                    <label>Site Direction</label>
+                    <div className="rotation-buttons">
+                      <button
+                        className="btn-rotate"
+                        onClick={() =>
+                          handleRotationChange(
+                            "site",
+                            ((designPlan.site.rotation || 0) - 22.5 + 360) % 360
+                          )
+                        }
+                      >
+                        ↶
+                      </button>
+                      <span className="rotation-value">
+                        {designPlan.site.rotation || 0}°
+                      </span>
+                      <button
+                        className="btn-rotate"
+                        onClick={() =>
+                          handleRotationChange(
+                            "site",
+                            ((designPlan.site.rotation || 0) + 22.5) % 360
+                          )
+                        }
+                      >
+                        ↷
+                      </button>
+                    </div>
+                  </div>
+                  <div className="rotation-item">
+                    <label>Site Size</label>
+                    <div className="rotation-buttons">
+                      <button
+                        className="btn-rotate"
+                        onClick={() => handleSizeChange("site", -10)}
+                      >
+                        −
+                      </button>
+                      <span className="rotation-value">
+                        {designPlan.site.size || 100}
+                      </span>
+                      <button
+                        className="btn-rotate"
+                        onClick={() => handleSizeChange("site", 10)}
                       >
                         +
                       </button>
@@ -660,6 +746,7 @@ const DesignPlan = () => {
               <span className="legend-item">⬆️ Load Arrow</span>
               <span className="legend-item">👤 Driver</span>
               <span className="legend-item">💨 Wind</span>
+              <span className="legend-item">🏢 Site</span>
             </div>
           </div>
           <div className="focused-footer">
@@ -668,16 +755,16 @@ const DesignPlan = () => {
               onClick={undoDesignPlan}
               disabled={!canUndo}
             >
-              ↩️ Undo
+              Undo
             </button>
             <button className="btn btn-secondary" onClick={resetDesignPlan}>
-              🔄 Reset
+              Reset
             </button>
             <button
               className="btn btn-close"
               onClick={() => setIsFocused(false)}
             >
-              ✖️ Exit
+              close
             </button>
           </div>
         </div>

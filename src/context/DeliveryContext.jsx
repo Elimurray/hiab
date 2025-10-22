@@ -23,6 +23,7 @@ export const DeliveryProvider = ({ children }) => {
     loadArrow: null, // { x, y, rotation }
     driver: null, // { x, y }
     windArrow: null, // { x, y, rotation }
+    site: null, // { x, y, rotation, size }
   });
 
   const [designPlanHistory, setDesignPlanHistory] = useState([]);
@@ -85,6 +86,7 @@ export const DeliveryProvider = ({ children }) => {
       loadArrow: null,
       driver: null,
       windArrow: null,
+      site: null,
     });
     setMapCenter({ lat: -37.787, lng: 175.2793 });
     setFormData({
