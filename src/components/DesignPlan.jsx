@@ -225,8 +225,10 @@ const DesignPlan = () => {
           points: [{ x, y }],
           color: lineColor,
         });
-      } else if (tool === "truck" && !designPlan.truck) {
-        updateDesignPlan({ truck: { x, y, rotation: 0 } });
+      } else if (tool === "truck") {
+        updateDesignPlan({
+          truck: { x, y, rotation: designPlan.truck?.rotation || 0 },
+        });
       } else if (tool === "cone") {
         updateDesignPlan({
           cones: [...designPlan.cones, { id: Date.now(), x, y }],
@@ -239,12 +241,16 @@ const DesignPlan = () => {
           ],
         });
         setDropZoneCount(dropZoneCount + 1);
-      } else if (tool === "loadArrow" && !designPlan.loadArrow) {
-        updateDesignPlan({ loadArrow: { x, y, rotation: 0 } });
-      } else if (tool === "driver" && !designPlan.driver) {
+      } else if (tool === "loadArrow") {
+        updateDesignPlan({
+          loadArrow: { x, y, rotation: designPlan.loadArrow?.rotation || 0 },
+        });
+      } else if (tool === "driver") {
         updateDesignPlan({ driver: { x, y } });
-      } else if (tool === "windArrow" && !designPlan.windArrow) {
-        updateDesignPlan({ windArrow: { x, y, rotation: 0 } });
+      } else if (tool === "windArrow") {
+        updateDesignPlan({
+          windArrow: { x, y, rotation: designPlan.windArrow?.rotation || 0 },
+        });
       }
       redrawCanvas();
     },
