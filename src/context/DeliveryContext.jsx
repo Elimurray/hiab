@@ -16,7 +16,7 @@ export const DeliveryProvider = ({ children }) => {
 
   // Store design plan annotations
   const [designPlan, setDesignPlan] = useState({
-    truck: null, // { x, y }
+    truck: null, // { x, y, rotation, size }
     cones: [], // [{ id, x, y }]
     lines: [], // [{ id, points: [{ x, y }], color }]
     dropZones: [], // [{ id, number, x, y }]

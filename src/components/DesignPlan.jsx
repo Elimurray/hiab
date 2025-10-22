@@ -147,7 +147,7 @@ const DesignPlan = () => {
           "truck",
           designPlan.truck.x,
           designPlan.truck.y,
-          100,
+          designPlan.truck.size || 100,
           designPlan.truck.rotation || 0
         );
       }
@@ -227,7 +227,12 @@ const DesignPlan = () => {
         });
       } else if (tool === "truck") {
         updateDesignPlan({
-          truck: { x, y, rotation: designPlan.truck?.rotation || 0 },
+          truck: {
+            x,
+            y,
+            rotation: designPlan.truck?.rotation || 0,
+            size: designPlan.truck?.size || 100,
+          },
         });
       } else if (tool === "cone") {
         updateDesignPlan({
@@ -292,6 +297,19 @@ const DesignPlan = () => {
   // Handle rotation for arrows
   const handleRotationChange = (type, rotation) => {
     updateDesignPlan({ [type]: { ...designPlan[type], rotation } });
+    redrawCanvas();
+  };
+
+  // Handle size for truck
+  const handleSizeChange = (delta) => {
+    const currentSize = designPlan.truck?.size || 100;
+    const newSize = Math.max(50, Math.min(200, currentSize + delta)); // Clamp between 50 and 200
+    updateDesignPlan({
+      truck: {
+        ...designPlan.truck,
+        size: newSize,
+      },
+    });
     redrawCanvas();
   };
 
@@ -512,36 +530,59 @@ const DesignPlan = () => {
             (tool === "truck" && designPlan.truck)) && (
             <div className="rotation-panel">
               {tool === "truck" && designPlan.truck && (
-                <div className="rotation-item">
-                  <label>Truck Direction</label>
-                  <div className="rotation-buttons">
-                    <button
-                      className="btn-rotate"
-                      onClick={() =>
-                        handleRotationChange(
-                          "truck",
-                          ((designPlan.truck.rotation || 0) - 22.5 + 360) % 360
-                        )
-                      }
-                    >
-                      ↶
-                    </button>
-                    <span className="rotation-value">
-                      {designPlan.truck.rotation || 0}°
-                    </span>
-                    <button
-                      className="btn-rotate"
-                      onClick={() =>
-                        handleRotationChange(
-                          "truck",
-                          ((designPlan.truck.rotation || 0) + 22.5) % 360
-                        )
-                      }
-                    >
-                      ↷
-                    </button>
+                <>
+                  <div className="rotation-item">
+                    <label>Truck Direction</label>
+                    <div className="rotation-buttons">
+                      <button
+                        className="btn-rotate"
+                        onClick={() =>
+                          handleRotationChange(
+                            "truck",
+                            ((designPlan.truck.rotation || 0) - 22.5 + 360) %
+                              360
+                          )
+                        }
+                      >
+                        ↶
+                      </button>
+                      <span className="rotation-value">
+                        {designPlan.truck.rotation || 0}°
+                      </span>
+                      <button
+                        className="btn-rotate"
+                        onClick={() =>
+                          handleRotationChange(
+                            "truck",
+                            ((designPlan.truck.rotation || 0) + 22.5) % 360
+                          )
+                        }
+                      >
+                        ↷
+                      </button>
+                    </div>
                   </div>
-                </div>
+                  <div className="rotation-item">
+                    <label>Truck Size</label>
+                    <div className="rotation-buttons">
+                      <button
+                        className="btn-rotate"
+                        onClick={() => handleSizeChange(-10)}
+                      >
+                        −
+                      </button>
+                      <span className="rotation-value">
+                        {designPlan.truck.size || 100}
+                      </span>
+                      <button
+                        className="btn-rotate"
+                        onClick={() => handleSizeChange(10)}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                </>
               )}
               {tool === "loadArrow" && designPlan.loadArrow && (
                 <div className="rotation-item">
