@@ -505,7 +505,8 @@
     position: relative; /* Stays in document flow within bottom-container */
     background: rgba(249, 250, 251, 0.98);
     backdrop-filter: blur(10px);
-    padding: 8px 10px;
+    padding: 8px 10px 25px 10px;
+
     border-top: 1px solid #e5e7eb;
     z-index: 999; /* Below rotation-panel */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);

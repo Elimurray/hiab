@@ -327,6 +327,19 @@ const DesignPlan = () => {
     navigate("/form");
   };
 
+  // Save canvas as image
+  const handleSaveImage = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    // Create a download link
+    const link = document.createElement("a");
+    const timestamp = new Date().toISOString().split("T")[0];
+    link.download = `hiab-site-plan-${timestamp}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  };
+
   return (
     <div className="design-plan-container">
       {!isFocused && (
@@ -588,6 +601,9 @@ const DesignPlan = () => {
           </button>
           <button className="btn btn-secondary" onClick={resetDesignPlan}>
             Reset Design
+          </button>
+          <button className="btn btn-secondary" onClick={handleSaveImage}>
+            💾 Save Image
           </button>
           <button className="btn btn-primary" onClick={handleContinue}>
             Continue to Form →
