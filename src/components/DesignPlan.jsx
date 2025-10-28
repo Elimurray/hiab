@@ -459,24 +459,24 @@ const DesignPlan = () => {
                 onClick={() => setTool("truck")}
                 title="Truck"
               >
-                <span className="btn-text">Truck</span>
                 <span className="btn-icon">🚛</span>
+                <span className="btn-text">Truck</span>
               </button>
               <button
                 className={`btn btn-tool ${tool === "cone" ? "active" : ""}`}
                 onClick={() => setTool("cone")}
                 title="Cone"
               >
-                <span className="btn-text">Cone</span>
                 <span className="btn-icon">🗼</span>
+                <span className="btn-text">Cone</span>
               </button>
               <button
                 className={`btn btn-tool ${tool === "line" ? "active" : ""}`}
                 onClick={() => setTool("line")}
                 title="Draw Line"
               >
-                <span className="btn-text">Draw Line</span>
                 <span className="btn-icon">✏️</span>
+                <span className="btn-text">Draw Line</span>
               </button>
               {/* <select
                 value={lineColor}
@@ -497,8 +497,8 @@ const DesignPlan = () => {
                 onClick={() => setTool("dropZone")}
                 title="Drop Zone"
               >
-                <span className="btn-text">Drop Zone</span>
                 <span className="btn-icon">📍</span>
+                <span className="btn-text">Drop Zone</span>
               </button>
               <button
                 className={`btn btn-tool ${
@@ -507,16 +507,16 @@ const DesignPlan = () => {
                 onClick={() => setTool("loadArrow")}
                 title="Load Arrow"
               >
-                <span className="btn-text">Load Arrow</span>
                 <span className="btn-icon">⬆️</span>
+                <span className="btn-text">Load Arrow</span>
               </button>
               <button
                 className={`btn btn-tool ${tool === "driver" ? "active" : ""}`}
                 onClick={() => setTool("driver")}
                 title="Driver"
               >
-                <span className="btn-text">Driver</span>
                 <span className="btn-icon">👤</span>
+                <span className="btn-text">Driver</span>
               </button>
               <button
                 className={`btn btn-tool ${
@@ -525,16 +525,16 @@ const DesignPlan = () => {
                 onClick={() => setTool("windArrow")}
                 title="Wind Arrow"
               >
-                <span className="btn-text">Wind Arrow</span>
                 <span className="btn-icon">💨</span>
+                <span className="btn-text">Wind Arrow</span>
               </button>
               <button
                 className={`btn btn-tool ${tool === "site" ? "active" : ""}`}
                 onClick={() => setTool("site")}
                 title="Site"
               >
-                <span className="btn-text">Site</span>
                 <span className="btn-icon">🏢</span>
+                <span className="btn-text">Site</span>
               </button>
             </div>
           </div>
@@ -565,54 +565,44 @@ const DesignPlan = () => {
                 <>
                   <div className="rotation-item">
                     <label>Truck Direction</label>
-                    <div className="rotation-buttons">
-                      <button
-                        className="btn-rotate"
-                        onClick={() =>
-                          handleRotationChange(
-                            "truck",
-                            ((designPlan.truck.rotation || 0) - 22.5 + 360) %
-                              360
-                          )
-                        }
-                      >
-                        ↶
-                      </button>
-                      <span className="rotation-value">
-                        {designPlan.truck.rotation || 0}°
-                      </span>
-                      <button
-                        className="btn-rotate"
-                        onClick={() =>
-                          handleRotationChange(
-                            "truck",
-                            ((designPlan.truck.rotation || 0) + 22.5) % 360
-                          )
-                        }
-                      >
-                        ↷
-                      </button>
-                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="360"
+                      step="10"
+                      value={designPlan.truck.rotation || 0}
+                      onChange={(e) =>
+                        handleRotationChange(
+                          "truck",
+                          parseFloat(e.target.value)
+                        )
+                      }
+                      className="rotation-slider"
+                    />
+                    <span className="rotation-value">
+                      {designPlan.truck.rotation || 0}°
+                    </span>
                   </div>
                   <div className="rotation-item">
                     <label>Truck Size</label>
-                    <div className="rotation-buttons">
-                      <button
-                        className="btn-rotate"
-                        onClick={() => handleSizeChange("truck", -10)}
-                      >
-                        −
-                      </button>
-                      <span className="rotation-value">
-                        {designPlan.truck.size || 100}
-                      </span>
-                      <button
-                        className="btn-rotate"
-                        onClick={() => handleSizeChange("truck", 10)}
-                      >
-                        +
-                      </button>
-                    </div>
+                    <input
+                      type="range"
+                      min="150"
+                      max="400"
+                      step="10"
+                      value={designPlan.truck.size || 100}
+                      onChange={(e) =>
+                        handleSizeChange(
+                          "truck",
+                          parseFloat(e.target.value) -
+                            (designPlan.truck?.size || 100)
+                        )
+                      }
+                      className="size-slider"
+                    />
+                    <span className="rotation-value">
+                      {designPlan.truck.size || 100}
+                    </span>
                   </div>
                 </>
               )}
@@ -620,123 +610,91 @@ const DesignPlan = () => {
                 <>
                   <div className="rotation-item">
                     <label>Site Direction</label>
-                    <div className="rotation-buttons">
-                      <button
-                        className="btn-rotate"
-                        onClick={() =>
-                          handleRotationChange(
-                            "site",
-                            ((designPlan.site.rotation || 0) - 22.5 + 360) % 360
-                          )
-                        }
-                      >
-                        ↶
-                      </button>
-                      <span className="rotation-value">
-                        {designPlan.site.rotation || 0}°
-                      </span>
-                      <button
-                        className="btn-rotate"
-                        onClick={() =>
-                          handleRotationChange(
-                            "site",
-                            ((designPlan.site.rotation || 0) + 22.5) % 360
-                          )
-                        }
-                      >
-                        ↷
-                      </button>
-                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="360"
+                      step="10"
+                      value={designPlan.site.rotation || 0}
+                      onChange={(e) =>
+                        handleRotationChange("site", parseFloat(e.target.value))
+                      }
+                      className="rotation-slider"
+                    />
+                    <span className="rotation-value">
+                      {designPlan.site.rotation || 0}°
+                    </span>
                   </div>
                   <div className="rotation-item">
                     <label>Site Size</label>
-                    <div className="rotation-buttons">
-                      <button
-                        className="btn-rotate"
-                        onClick={() => handleSizeChange("site", -10)}
-                      >
-                        −
-                      </button>
-                      <span className="rotation-value">
-                        {designPlan.site.size || 100}
-                      </span>
-                      <button
-                        className="btn-rotate"
-                        onClick={() => handleSizeChange("site", 10)}
-                      >
-                        +
-                      </button>
-                    </div>
+                    <input
+                      type="range"
+                      min="150"
+                      max="400"
+                      step="10"
+                      value={designPlan.site.size || 100}
+                      onChange={(e) =>
+                        handleSizeChange(
+                          "site",
+                          parseFloat(e.target.value) -
+                            (designPlan.site?.size || 100)
+                        )
+                      }
+                      className="size-slider"
+                    />
+                    <span className="rotation-value">
+                      {designPlan.site.size || 100}
+                    </span>
                   </div>
                 </>
               )}
               {tool === "loadArrow" && designPlan.loadArrow && (
                 <div className="rotation-item">
                   <label>Load Arrow Direction</label>
-                  <div className="rotation-buttons">
-                    <button
-                      className="btn-rotate"
-                      onClick={() =>
-                        handleRotationChange(
-                          "loadArrow",
-                          (designPlan.loadArrow.rotation - 22.5 + 360) % 360
-                        )
-                      }
-                    >
-                      ↶
-                    </button>
-                    <span className="rotation-value">
-                      {designPlan.loadArrow.rotation}°
-                    </span>
-                    <button
-                      className="btn-rotate"
-                      onClick={() =>
-                        handleRotationChange(
-                          "loadArrow",
-                          (designPlan.loadArrow.rotation + 22.5) % 360
-                        )
-                      }
-                    >
-                      ↷
-                    </button>
-                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="360"
+                    step="10"
+                    value={designPlan.loadArrow.rotation}
+                    onChange={(e) =>
+                      handleRotationChange(
+                        "loadArrow",
+                        parseFloat(e.target.value)
+                      )
+                    }
+                    className="rotation-slider"
+                  />
+                  <span className="rotation-value">
+                    {designPlan.loadArrow.rotation}°
+                  </span>
                 </div>
               )}
               {tool === "windArrow" && designPlan.windArrow && (
                 <div className="rotation-item">
                   <label>Wind Arrow Direction</label>
-                  <div className="rotation-buttons">
-                    <button
-                      className="btn-rotate"
-                      onClick={() =>
-                        handleRotationChange(
-                          "windArrow",
-                          (designPlan.windArrow.rotation - 22.5 + 360) % 360
-                        )
-                      }
-                    >
-                      ↶
-                    </button>
-                    <span className="rotation-value">
-                      {designPlan.windArrow.rotation}°
-                    </span>
-                    <button
-                      className="btn-rotate"
-                      onClick={() =>
-                        handleRotationChange(
-                          "windArrow",
-                          (designPlan.windArrow.rotation + 22.5) % 360
-                        )
-                      }
-                    >
-                      ↷
-                    </button>
-                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="360"
+                    step="10"
+                    value={designPlan.windArrow.rotation}
+                    onChange={(e) =>
+                      handleRotationChange(
+                        "windArrow",
+                        parseFloat(e.target.value)
+                      )
+                    }
+                    className="rotation-slider"
+                  />
+                  <span className="rotation-value">
+                    {designPlan.windArrow.rotation}°
+                  </span>
                 </div>
               )}
             </div>
           )}
-          <div className="mobile-legend">
+          {/* <div className="mobile-legend">
             <div className="legend-title">Legend:</div>
             <div className="legend-items">
               <span className="legend-item">🚛 Truck</span>
@@ -748,7 +706,7 @@ const DesignPlan = () => {
               <span className="legend-item">💨 Wind</span>
               <span className="legend-item">🏢 Site</span>
             </div>
-          </div>
+          </div> */}
           <div className="focused-footer">
             <button
               className="btn btn-secondary"

@@ -101,25 +101,39 @@
   padding: 12px 24px;
   font-size: 1rem;
   font-weight: 600;
-  border: none;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .btn-tool {
-  background: white;
-  border: 2px solid #d1d5db;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  transition: all 0.2s ease;
 }
 
 .btn-tool:hover {
-  background: #f3f4f6;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .btn-tool.active {
-  background: #3b82f6;
+  background: #2563eb;
   color: white;
-  border: 2px solid #1e40af;
+  border-color: #1d4ed8;
+}
+
+.btn-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.btn-text {
+  font-size: 11px;
+  white-space: nowrap;
 }
 
 .btn-secondary {
@@ -288,6 +302,8 @@
 
 .btn-tool {
   transition: all 0.2s ease;
+  background: white;
+  border: 2px solid #d1d5db;
 }
 
 .btn-tool:hover {
@@ -434,17 +450,18 @@
     overflow: visible;
   }
 
-  /* Hide text, show only icons on mobile */
+  /* Hide text, show only icons on mobile
   .toolbar-content .btn-tool .btn-text,
   .toolbar-content .btn-secondary .btn-text,
   .toolbar-content .btn-close .btn-text {
     display: none;
-  }
+  } */
 
   .toolbar-content .btn-tool .btn-icon,
   .toolbar-content .btn-secondary .btn-icon,
   .toolbar-content .btn-close .btn-icon {
     display: inline;
+
     font-size: 25px;
   }
 
@@ -453,7 +470,7 @@
   .toolbar-content .btn-close {
     min-width: unset;
     width: 100%;
-    min-height: 42px;
+    min-height: 65px;
     padding: 6px;
     display: flex;
     align-items: center;
@@ -463,8 +480,8 @@
   /* Canvas takes all remaining space */
   .canvas-wrapper.focused {
     position: fixed;
-    top: 60px;
-    bottom: 120px; /* Fixed to account for footer (~75px) + legend (45px) */
+    top: 65px;
+    bottom: 50px; /* Fixed to account for footer (~75px) + legend (45px) */
     left: 0;
     right: 0;
     padding: 8px;
@@ -503,11 +520,10 @@
   /* Mobile legend - directly above footer, in bottom-container flow */
   .mobile-legend {
     position: relative; /* Stays in document flow within bottom-container */
-    background: rgba(249, 250, 251, 0.98);
+    background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(10px);
     padding: 8px 10px 15px 10px;
 
-    border-top: 1px solid #e5e7eb;
     z-index: 999; /* Below rotation-panel */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     min-height: 45px;
@@ -543,7 +559,7 @@
     z-index: 1000; /* Above legend (999), below footer (1001) */
     padding: 12px 10px;
     display: flex;
-    gap: 12px;
+    gap: 75px;
     justify-content: center;
     box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
     min-height: 80px;
@@ -578,6 +594,11 @@
   .rotation-value {
     font-size: 16px;
     min-width: 50px;
+  }
+  .rotation-slider,
+  .size-slider {
+    width: 160px;
+    height: 30px;
   }
 }
 
