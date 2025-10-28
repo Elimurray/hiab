@@ -475,6 +475,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 2px solid #d1d5db;
   }
 
   /* Canvas takes all remaining space */
