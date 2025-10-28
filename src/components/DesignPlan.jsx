@@ -27,6 +27,10 @@ const DesignPlan = () => {
   const [error, setError] = useState(null);
   const iconImagesRef = useRef({}); // Store preloaded icon Image objects
   const [isFocused, setIsFocused] = useState(false);
+  const isIOS = ["iPad", "iPhone", "iPod"].some((device) =>
+    navigator.userAgent.includes(device)
+  );
+  const isAndroid = navigator.userAgent.includes("Android");
 
   // Define icons
   const icons = {
@@ -368,27 +372,49 @@ const DesignPlan = () => {
     navigate("/form");
   };
 
-  // Save canvas as image
-
+  // Replace your handleSaveImage and triggerDownload with this:
   const handleSaveImage = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const dataUrl = canvas.toDataURL("image/png");
-    const isMobile = new RegExp("iPhone|iPad|iPod|Android", "i").test(
-      navigator.userAgent
-    );
+    const fileName = `hiab-site-plan-${
+      new Date().toISOString().split("T")[0]
+    }.png`;
 
-    if (navigator.share && isMobile) {
+    // iOS: Open image in new tab → triggers native "Save Image"
+    if (isIOS) {
+      const newWin = window.open("", "_blank");
+      if (newWin) {
+        newWin.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head><title>Hiab Site Plan</title></head>
+          <body style="margin:0;background:#111;display:flex;justify-content:center;align-items:center;height:100vh;">
+            <img src="${dataUrl}" style="max-width:100%;height:auto;" />
+          </body>
+        </html>
+      `);
+        newWin.document.close();
+
+        // Fallback: hidden download link
+        setTimeout(() => {
+          const a = newWin.document.createElement("a");
+          a.href = dataUrl;
+          a.download = fileName;
+          a.style.display = "none";
+          newWin.document.body.appendChild(a);
+          a.click();
+        }, 100);
+      }
+      return;
+    }
+
+    // Android: Use native share (gives "Save Image")
+    if (isAndroid && navigator.share) {
       canvas.toBlob((blob) => {
         if (!blob) return;
-        const file = new File(
-          [blob],
-          `hiab-site-plan-${new Date().toISOString().split("T")[0]}.png`,
-          {
-            type: "image/png",
-          }
-        );
+        const file = new File([blob], fileName, { type: "image/png" });
 
         navigator
           .share({
@@ -396,23 +422,19 @@ const DesignPlan = () => {
             title: "Hiab Site Plan",
             text: "Site plan design",
           })
-          .catch(() => {
-            triggerDownload(dataUrl);
-          });
+          .catch(() => triggerDownload(dataUrl, fileName));
       }, "image/png");
       return;
     }
 
-    // Desktop or no share support
-    triggerDownload(dataUrl);
+    // Desktop / fallback: direct download
+    triggerDownload(dataUrl, fileName);
   };
 
-  const triggerDownload = (dataUrl) => {
+  const triggerDownload = (dataUrl, fileName) => {
     const link = document.createElement("a");
     link.href = dataUrl;
-    link.download = `hiab-site-plan-${
-      new Date().toISOString().split("T")[0]
-    }.png`;
+    link.download = fileName;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
