@@ -567,8 +567,8 @@ const DesignPlan = () => {
                     <label>Truck Direction</label>
                     <input
                       type="range"
-                      min="0"
-                      max="360"
+                      min="-180"
+                      max="180"
                       step="10"
                       value={designPlan.truck.rotation || 0}
                       onChange={(e) =>
@@ -612,8 +612,8 @@ const DesignPlan = () => {
                     <label>Site Direction</label>
                     <input
                       type="range"
-                      min="0"
-                      max="360"
+                      min="-180"
+                      max="180"
                       step="10"
                       value={designPlan.site.rotation || 0}
                       onChange={(e) =>
@@ -653,8 +653,8 @@ const DesignPlan = () => {
                   <label>Load Arrow Direction</label>
                   <input
                     type="range"
-                    min="0"
-                    max="360"
+                    min="-180"
+                    max="180"
                     step="10"
                     value={designPlan.loadArrow.rotation}
                     onChange={(e) =>
@@ -675,8 +675,8 @@ const DesignPlan = () => {
                   <label>Wind Arrow Direction</label>
                   <input
                     type="range"
-                    min="0"
-                    max="360"
+                    min="-180"
+                    max="180"
                     step="10"
                     value={designPlan.windArrow.rotation}
                     onChange={(e) =>
