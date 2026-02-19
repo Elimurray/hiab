@@ -7,7 +7,7 @@ import {
 import LoginButton from "./LoginButton";
 import Navbar from "./Navbar";
 
-const ALLOWED_DOMAIN = "@outlook.com";
+const ALLOWED_DOMAIN = "@live.com";
 
 function DomainCheck({ children }) {
   const { instance, accounts } = useMsal();
