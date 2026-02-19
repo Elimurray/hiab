@@ -4,10 +4,27 @@ import {
   UnauthenticatedTemplate,
   useMsal,
 } from "@azure/msal-react";
-import LoginButton from "./LoginButton";
 import Navbar from "./Navbar";
+import cartersLogo from "../assets/Carters_Horizontal_transparent.png";
+import "./AuthGate.css";
 
 const ALLOWED_DOMAIN = "@live.com";
+
+const LOGIN_REQUEST = {
+  scopes: ["openid", "profile", "email", "User.Read"],
+};
+
+// Microsoft logo SVG (official four-square mark)
+function MicrosoftLogo() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 21 21">
+      <rect x="1" y="1" width="9" height="9" fill="#f25022" />
+      <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
+      <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
+      <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
+    </svg>
+  );
+}
 
 function DomainCheck({ children }) {
   const { instance, accounts } = useMsal();
@@ -22,33 +39,28 @@ function DomainCheck({ children }) {
 
   if (unauthorized) {
     return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-          gap: "12px",
-        }}
-      >
-        <p style={{ fontSize: "18px" }}>
-          Unauthorized: your account domain is not permitted to access this
-          application.
-        </p>
-        <button
-          onClick={() =>
-            instance
-              .loginRedirect({
-                scopes: ["openid", "profile", "email", "User.Read"],
-                prompt: "select_account",
-              })
-              .catch(console.error)
-          }
-          style={{ padding: "8px 20px", cursor: "pointer" }}
-        >
-          Sign in with a different account
-        </button>
+      <div className="auth-page">
+        <div className="auth-card">
+          <img src={cartersLogo} alt="Carter's" className="auth-logo" />
+          <div className="auth-divider" />
+          <div className="auth-error-icon">⚠️</div>
+          <h1>Access Denied</h1>
+          <p className="auth-error-text">
+            Your account domain is not permitted to access this application.
+            Please sign in with an authorised account.
+          </p>
+          <button
+            className="btn-switch-account"
+            onClick={() =>
+              instance
+                .loginRedirect({ ...LOGIN_REQUEST, prompt: "select_account" })
+                .catch(console.error)
+            }
+          >
+            Sign in with a different account
+          </button>
+        </div>
+        <p className="auth-footer">HIAB Site Planner &mdash; Carter's</p>
       </div>
     );
   }
@@ -62,21 +74,31 @@ function DomainCheck({ children }) {
 }
 
 export default function AuthGate({ children }) {
+  const { instance } = useMsal();
+
   return (
     <>
       <AuthenticatedTemplate>
         <DomainCheck>{children}</DomainCheck>
       </AuthenticatedTemplate>
       <UnauthenticatedTemplate>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100vh",
-          }}
-        >
-          <LoginButton />
+        <div className="auth-page">
+          <div className="auth-card">
+            <img src={cartersLogo} alt="Carter's" className="auth-logo" />
+            <div className="auth-divider" />
+            <h1>HIAB Site Planner</h1>
+            <p>Sign in with your Carter's Microsoft account to continue.</p>
+            <button
+              className="btn-microsoft"
+              onClick={() =>
+                instance.loginRedirect(LOGIN_REQUEST).catch(console.error)
+              }
+            >
+              <MicrosoftLogo />
+              Sign in with Microsoft
+            </button>
+          </div>
+          <p className="auth-footer">HIAB Site Planner &mdash; Carter's</p>
         </div>
       </UnauthenticatedTemplate>
     </>
