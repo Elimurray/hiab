@@ -8,7 +8,8 @@ import Navbar from "./Navbar";
 import cartersLogo from "../assets/Carters_Horizontal_transparent.png";
 import "./AuthGate.css";
 
-const ALLOWED_DOMAIN = "@live.com";
+const ALLOWED_DOMAINS = ["@carters.co.nz"];
+const ALLOWED_EMAILS = ["eliazzudo@outlook.com", "aaronmurr55@live.com"];
 
 const LOGIN_REQUEST = {
   scopes: ["openid", "profile", "email", "User.Read"],
@@ -17,7 +18,12 @@ const LOGIN_REQUEST = {
 // Microsoft logo SVG (official four-square mark)
 function MicrosoftLogo() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 21 21">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 21 21"
+    >
       <rect x="1" y="1" width="9" height="9" fill="#f25022" />
       <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
       <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
@@ -33,9 +39,15 @@ function DomainCheck({ children }) {
 
   useEffect(() => {
     if (!account) return;
-    const email = account.username ?? "";
-    setUnauthorized(!email.toLowerCase().endsWith(ALLOWED_DOMAIN));
-  }, [account]);
+    const email = account.username.toLowerCase();
+    const domainAllowed = ALLOWED_DOMAINS.some((domain) =>
+      email.endsWith(domain),
+    );
+    const emailAllowed = ALLOWED_EMAILS.includes(email);
+    const isAllowed = domainAllowed || emailAllowed;
+    setUnauthorized(!isAllowed);
+    if (!isAllowed) instance.logoutRedirect().catch(console.error);
+  }, [account, instance]);
 
   if (unauthorized) {
     return (
