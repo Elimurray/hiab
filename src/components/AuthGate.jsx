@@ -38,7 +38,7 @@ function DomainCheck({ children }) {
         <button
           onClick={() =>
             instance
-              .loginPopup({
+              .loginRedirect({
                 scopes: ["openid", "profile", "email", "User.Read"],
                 prompt: "select_account",
               })
