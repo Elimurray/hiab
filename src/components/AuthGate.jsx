@@ -46,8 +46,7 @@ function DomainCheck({ children }) {
     const emailAllowed = ALLOWED_EMAILS.includes(email);
     const isAllowed = domainAllowed || emailAllowed;
     setUnauthorized(!isAllowed);
-    if (!isAllowed) instance.logoutRedirect().catch(console.error);
-  }, [account, instance]);
+  }, [account]);
 
   if (unauthorized) {
     return (
