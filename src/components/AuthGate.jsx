@@ -5,6 +5,7 @@ import {
   useMsal,
 } from "@azure/msal-react";
 import LoginButton from "./LoginButton";
+import Navbar from "./Navbar";
 
 const ALLOWED_DOMAIN = "@outlook.com";
 
@@ -54,24 +55,8 @@ function DomainCheck({ children }) {
 
   return (
     <>
+      <Navbar />
       {children}
-      <button
-        onClick={() => instance.logoutRedirect().catch(console.error)}
-        style={{
-          position: "fixed",
-          top: "12px",
-          right: "12px",
-          padding: "6px 14px",
-          fontSize: "13px",
-          cursor: "pointer",
-          zIndex: 9999,
-          background: "#fff",
-          border: "1px solid #ccc",
-          borderRadius: "4px",
-        }}
-      >
-        Sign out
-      </button>
     </>
   );
 }
