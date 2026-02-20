@@ -1,7 +1,6 @@
 .map-view-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
 }
 
 .map-header {
@@ -10,6 +9,7 @@
 }
 
 .map-header h1 {
+  padding-top: 10px;
   font-size: 2.5rem;
   margin-bottom: 10px;
 }
@@ -165,7 +165,6 @@
   }
 
   .map-view-container {
-    padding: 10px;
   }
   .map-wrapper > div {
     height: 100% !important;

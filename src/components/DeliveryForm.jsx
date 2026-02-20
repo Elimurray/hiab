@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
 import { useDelivery } from "../context/DeliveryContext";
+import cartersLogo from "../assets/Carters_Horizontal_transparent.png";
 import jsPDF from "jspdf";
 import truckIcon from "../utils/truck.svg";
 import coneIcon from "../utils/cone.svg";
@@ -171,142 +172,147 @@ const DeliveryForm = () => {
     const canvas = await buildAnnotatedCanvas();
 
     const pdf = new jsPDF("p", "mm", "a4");
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
+    const pageW = pdf.internal.pageSize.getWidth();   // 210
+    const pageH = pdf.internal.pageSize.getHeight();  // 297
     const margin = 10;
-    const maxY = pageHeight - 20;
-    let y = 20;
 
-    const checkBreak = (space) => {
-      if (y + space > maxY) {
-        pdf.addPage();
-        y = 20;
-      }
+    // Two-column layout
+    const leftW = 82;
+    const gap = 6;
+    const rightX = margin + leftW + gap;
+    const rightW = pageW - rightX - margin;           // ~102mm
+
+    // ── Header ──────────────────────────────────────────────────────────────
+    // Carter's logo (left-aligned)
+    const logoImg = await loadImage(cartersLogo);
+    if (logoImg) {
+      const logoH = 10;
+      const logoW = logoH * (logoImg.naturalWidth / logoImg.naturalHeight);
+      const c = document.createElement("canvas");
+      c.width = logoImg.naturalWidth;
+      c.height = logoImg.naturalHeight;
+      c.getContext("2d").drawImage(logoImg, 0, 0);
+      pdf.addImage(c.toDataURL("image/png"), "PNG", margin, margin, logoW, logoH);
+    }
+
+    // Title (right-aligned in header)
+    pdf.setFontSize(14);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(31, 41, 55);
+    pdf.text("HIAB DELIVERY SITE PLAN", pageW - margin, margin + 6, { align: "right" });
+    pdf.setFontSize(8);
+    pdf.setFont("helvetica", "normal");
+    pdf.setTextColor(107, 114, 128);
+    pdf.text("Drop-off Location & Details", pageW - margin, margin + 11, { align: "right" });
+
+    // Divider under header
+    const headerH = 24;
+    pdf.setDrawColor(220, 220, 220);
+    pdf.line(margin, margin + headerH, pageW - margin, margin + headerH);
+
+    // ── Content starts here ──────────────────────────────────────────────────
+    const contentTop = margin + headerH + 5;
+    const contentH = pageH - contentTop - 14; // leave room for footer
+    let leftY = contentTop;
+
+    const sectionTitle = (title) => {
+      pdf.setFontSize(7.5);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(107, 114, 128);
+      pdf.text(title.toUpperCase(), margin, leftY);
+      leftY += 3.5;
+      pdf.setDrawColor(220, 220, 220);
+      pdf.line(margin, leftY, margin + leftW, leftY);
+      leftY += 4;
     };
 
-    // Header
-    pdf.setFontSize(22);
-    pdf.setFont("helvetica", "bold");
-    pdf.text("HIAB DELIVERY SITE PLAN", pageWidth / 2, y, { align: "center" });
-    y += 10;
-    pdf.setFontSize(10);
-    pdf.setFont("helvetica", "normal");
-    pdf.text("Drop-off Location & Details", pageWidth / 2, y, { align: "center" });
-    y += 8;
-
-    // Delivery Information
-    checkBreak(50);
-    pdf.setFontSize(14);
-    pdf.setFont("helvetica", "bold");
-    pdf.text("Delivery Information", 15, y);
-    y += 8;
-    pdf.setFontSize(10);
-
-    const infoRows = [
-      ["Driver Name:", data.driverName],
-      ["Client Name:", data.clientName],
-      ["Client Address:", data.clientAddress],
-      ["Delivery Date:", new Date(data.date).toLocaleDateString()],
-    ];
-    infoRows.forEach(([label, value]) => {
+    const field = (label, value) => {
+      pdf.setFontSize(7);
       pdf.setFont("helvetica", "bold");
-      pdf.text(label, 15, y);
+      pdf.setTextColor(107, 114, 128);
+      pdf.text(label, margin, leftY);
+      leftY += 3.5;
       pdf.setFont("helvetica", "normal");
-      pdf.text(value, 55, y);
-      y += 7;
-    });
-    y += 3;
+      pdf.setTextColor(31, 41, 55);
+      pdf.setFontSize(8.5);
+      const wrapped = pdf.splitTextToSize(value || "—", leftW);
+      pdf.text(wrapped, margin, leftY);
+      leftY += wrapped.length * 4.2 + 3;
+    };
 
-    // Load Details
-    checkBreak(30);
-    pdf.setFontSize(14);
-    pdf.setFont("helvetica", "bold");
-    pdf.text("Load Details", 15, y);
-    y += 8;
-    pdf.setFontSize(10);
+    // Delivery info
+    sectionTitle("Delivery Information");
+    field("Driver Name", data.driverName);
+    field("Client Name", data.clientName);
+    field("Client Address", data.clientAddress);
+    field("Delivery Date", new Date(data.date).toLocaleDateString("en-NZ", { day: "2-digit", month: "long", year: "numeric" }));
 
-    pdf.setFont("helvetica", "bold");
-    pdf.text("Description:", 15, y);
-    pdf.setFont("helvetica", "normal");
-    pdf.text(data.loadDescription, 55, y);
-    y += 7;
-    pdf.setFont("helvetica", "bold");
-    pdf.text("Weight:", 15, y);
-    pdf.setFont("helvetica", "normal");
-    pdf.text(`${data.weight} kg`, 55, y);
-    y += 10;
+    leftY += 2;
+    sectionTitle("Load Details");
+    field("Description", data.loadDescription);
+    field("Weight", `${data.weight} kg`);
 
-    // Site Plan image
+    leftY += 2;
+    sectionTitle("Annotations");
+    field("Drop Zones", `${designPlan.dropZones.length}`);
+    field("Cones", `${designPlan.cones.length}`);
+    field("Lines", `${designPlan.lines.length}`);
+
+    if (data.accessNotes) {
+      leftY += 2;
+      sectionTitle("Access Notes");
+      pdf.setFontSize(8);
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(31, 41, 55);
+      const noteLines = pdf.splitTextToSize(data.accessNotes, leftW);
+      pdf.text(noteLines, margin, leftY);
+      leftY += noteLines.length * 4.2 + 3;
+    }
+
+    if (data.specialInstructions) {
+      leftY += 2;
+      sectionTitle("Special Instructions");
+      pdf.setFontSize(8);
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(31, 41, 55);
+      const instrLines = pdf.splitTextToSize(data.specialInstructions, leftW);
+      pdf.text(instrLines, margin, leftY);
+    }
+
+    // ── Right column: site plan image ────────────────────────────────────────
+    pdf.setFontSize(7.5);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(107, 114, 128);
+    pdf.text("SITE PLAN", rightX, contentTop - 1);
+    pdf.setDrawColor(220, 220, 220);
+    pdf.line(rightX, contentTop + 2.5, rightX + rightW, contentTop + 2.5);
+
     const imgData = canvas.toDataURL("image/png");
-    const maxW = pageWidth - margin * 2;
-    const maxH = 130;
+    const imgAreaTop = contentTop + 6;
+    const imgAreaH = contentH - 6;
     let iw = canvas.width;
     let ih = canvas.height;
-    const scaleW = maxW / iw;
-    const scaleH = maxH / ih;
-    const scale = Math.min(scaleW, scaleH);
-    iw = iw * scale;
-    ih = ih * scale;
+    const scale = Math.min(rightW / iw, imgAreaH / ih);
+    iw *= scale;
+    ih *= scale;
+    const imgX = rightX + (rightW - iw) / 2;
+    const imgY = imgAreaTop + (imgAreaH - ih) / 2;
+    pdf.addImage(imgData, "PNG", imgX, imgY, iw, ih);
 
-    checkBreak(ih + 15);
-    pdf.setFontSize(14);
-    pdf.setFont("helvetica", "bold");
-    pdf.text("Site Plan", 15, y);
-    y += 7;
-    pdf.addImage(imgData, "PNG", (pageWidth - iw) / 2, y, iw, ih);
-    y += ih + 10;
+    // Thin border around the image
+    pdf.setDrawColor(200, 200, 200);
+    pdf.rect(imgX, imgY, iw, ih);
 
-    // Annotations summary
-    checkBreak(35);
-    pdf.setFontSize(10);
-    pdf.setFont("helvetica", "bold");
-    pdf.text("Annotations:", 15, y);
-    y += 7;
+    // ── Footer ───────────────────────────────────────────────────────────────
+    pdf.setFontSize(7);
     pdf.setFont("helvetica", "normal");
-    pdf.text(`Drop Zones: ${designPlan.dropZones.length}`, 20, y); y += 7;
-    pdf.text(`Cones: ${designPlan.cones.length}`, 20, y); y += 7;
-    pdf.text(`Lines: ${designPlan.lines.length}`, 20, y); y += 10;
-
-    // Access Notes
-    if (data.accessNotes) {
-      const lines = pdf.splitTextToSize(data.accessNotes, pageWidth - 30);
-      checkBreak(lines.length * 5 + 20);
-      pdf.setFontSize(12);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Access Notes:", 15, y);
-      y += 7;
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "normal");
-      pdf.text(lines, 15, y);
-      y += lines.length * 5 + 8;
-    }
-
-    // Special Instructions
-    if (data.specialInstructions) {
-      const lines = pdf.splitTextToSize(data.specialInstructions, pageWidth - 30);
-      checkBreak(lines.length * 5 + 20);
-      pdf.setFontSize(12);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Special Instructions:", 15, y);
-      y += 7;
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "normal");
-      pdf.text(lines, 15, y);
-    }
-
-    // Footer
-    const totalPages = pdf.internal.pages.length - 1;
-    for (let i = 1; i <= totalPages; i++) {
-      pdf.setPage(i);
-      pdf.setFontSize(8);
-      pdf.setTextColor(107, 114, 128);
-      pdf.text(
-        `Generated on ${new Date().toLocaleString()} | Page ${i} of ${totalPages}`,
-        pageWidth / 2,
-        pageHeight - 10,
-        { align: "center" }
-      );
-    }
+    pdf.setTextColor(150, 150, 150);
+    pdf.text(
+      `Generated ${new Date().toLocaleString()} | HIAB Site Planner — Carter's`,
+      pageW / 2,
+      pageH - 5,
+      { align: "center" }
+    );
 
     pdf.save(`Hiab-Site-Plan-${data.clientName.replace(/\s/g, "-")}.pdf`);
   };
