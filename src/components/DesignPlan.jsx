@@ -327,6 +327,66 @@ const DesignPlan = () => {
     }
   }, [isDrawing, currentLine, designPlan, updateDesignPlan, redrawCanvas]);
 
+  // --- Touch helpers (mirror mouse handlers for mobile) ---
+  const getCanvasCoords = (clientX, clientY) => {
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: (clientX - rect.left) * (canvas.width / rect.width),
+      y: (clientY - rect.top) * (canvas.height / rect.height),
+    };
+  };
+
+  const handleTouchStart = useCallback(
+    (e) => {
+      if (!isFocused) return; // let onClick handle the focus tap
+      const touch = e.touches[0];
+      const { x, y } = getCanvasCoords(touch.clientX, touch.clientY);
+
+      if (tool === "line") {
+        setIsDrawing(true);
+        setCurrentLine({ id: Date.now(), points: [{ x, y }], color: lineColor });
+      } else if (tool === "truck") {
+        updateDesignPlan({ truck: { x, y, rotation: designPlan.truck?.rotation || 0, size: designPlan.truck?.size || 100 } });
+      } else if (tool === "cone") {
+        updateDesignPlan({ cones: [...designPlan.cones, { id: Date.now(), x, y }] });
+      } else if (tool === "dropZone") {
+        updateDesignPlan({ dropZones: [...designPlan.dropZones, { id: Date.now(), number: dropZoneCount, x, y }] });
+        setDropZoneCount(dropZoneCount + 1);
+      } else if (tool === "loadArrow") {
+        updateDesignPlan({ loadArrow: { x, y, rotation: designPlan.loadArrow?.rotation || 0 } });
+      } else if (tool === "driver") {
+        updateDesignPlan({ driver: { x, y } });
+      } else if (tool === "windArrow") {
+        updateDesignPlan({ windArrow: { x, y, rotation: designPlan.windArrow?.rotation || 0 } });
+      } else if (tool === "site") {
+        updateDesignPlan({ site: { x, y, rotation: designPlan.site?.rotation || 0, size: designPlan.site?.size || 200 } });
+      }
+      redrawCanvas();
+    },
+    [isFocused, tool, lineColor, designPlan, updateDesignPlan, dropZoneCount, redrawCanvas],
+  );
+
+  const handleTouchMove = useCallback(
+    (e) => {
+      if (!isDrawing || tool !== "line") return;
+      const touch = e.touches[0];
+      const { x, y } = getCanvasCoords(touch.clientX, touch.clientY);
+      setCurrentLine((prev) => ({ ...prev, points: [...prev.points, { x, y }] }));
+      redrawCanvas();
+    },
+    [isDrawing, tool, redrawCanvas],
+  );
+
+  const handleTouchEnd = useCallback(() => {
+    if (isDrawing && currentLine) {
+      updateDesignPlan({ lines: [...designPlan.lines, currentLine] });
+      setIsDrawing(false);
+      setCurrentLine(null);
+      redrawCanvas();
+    }
+  }, [isDrawing, currentLine, designPlan, updateDesignPlan, redrawCanvas]);
+
   // Handle rotation for arrows
   const handleRotationChange = (type, rotation) => {
     updateDesignPlan({ [type]: { ...designPlan[type], rotation } });
@@ -566,10 +626,14 @@ const DesignPlan = () => {
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
           onClick={() => !isFocused && setIsFocused(true)}
           style={{
             border: "1px solid #ccc",
             cursor: isFocused ? "crosshair" : "pointer",
+            touchAction: isFocused ? "none" : "auto",
           }}
         />
       </div>
@@ -752,12 +816,12 @@ const DesignPlan = () => {
           <button className="btn btn-secondary" onClick={() => navigate("/")}>
             ← Back to Map
           </button>
-          <button className="btn btn-secondary" onClick={resetDesignPlan}>
+          {/* <button className="btn btn-secondary" onClick={resetDesignPlan}>
             Reset Design
-          </button>
-          <button className="btn btn-secondary" onClick={handleSaveImage}>
+          </button> */}
+          {/* <button className="btn btn-secondary" onClick={handleSaveImage}>
             💾 Save Image
-          </button>
+          </button> */}
           <button className="btn btn-primary" onClick={handleContinue}>
             Continue to Form →
           </button>
