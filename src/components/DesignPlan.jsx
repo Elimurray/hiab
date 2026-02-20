@@ -489,6 +489,14 @@ const DesignPlan = () => {
                 <span className="btn-text">Truck</span>
               </button>
               <button
+                className={`btn btn-tool ${tool === "driver" ? "active" : ""}`}
+                onClick={() => setTool("driver")}
+                title="Driver"
+              >
+                <span className="btn-icon">👤</span>
+                <span className="btn-text">Driver</span>
+              </button>
+              <button
                 className={`btn btn-tool ${tool === "cone" ? "active" : ""}`}
                 onClick={() => setTool("cone")}
                 title="Cone"
@@ -536,14 +544,7 @@ const DesignPlan = () => {
                 <span className="btn-icon">⬆️</span>
                 <span className="btn-text">Load Arrow</span>
               </button>
-              <button
-                className={`btn btn-tool ${tool === "driver" ? "active" : ""}`}
-                onClick={() => setTool("driver")}
-                title="Driver"
-              >
-                <span className="btn-icon">👤</span>
-                <span className="btn-text">Driver</span>
-              </button>
+
               <button
                 className={`btn btn-tool ${
                   tool === "windArrow" ? "active" : ""
