@@ -97,7 +97,7 @@ export default function AuthGate({ children }) {
           <div className="auth-card">
             <img src={cartersLogo} alt="Carter's" className="auth-logo" />
             <div className="auth-divider" />
-            <h1>HIAB Site Planner</h1>
+            <h1>Auckland Distribution Center Hiab Site Planner</h1>
             <p>Sign in with your Carter's Microsoft account to continue.</p>
             <button
               className="btn-microsoft"

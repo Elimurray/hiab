@@ -28,7 +28,7 @@ const DesignPlan = () => {
   const iconImagesRef = useRef({}); // Store preloaded icon Image objects
   const [isFocused, setIsFocused] = useState(false);
   const isIOS = ["iPad", "iPhone", "iPod"].some((device) =>
-    navigator.userAgent.includes(device)
+    navigator.userAgent.includes(device),
   );
   const isAndroid = navigator.userAgent.includes("Android");
 
@@ -154,7 +154,7 @@ const DesignPlan = () => {
           designPlan.site.x,
           designPlan.site.y,
           designPlan.site.size || 200,
-          designPlan.site.rotation || 0
+          designPlan.site.rotation || 0,
         );
       }
 
@@ -165,7 +165,7 @@ const DesignPlan = () => {
           designPlan.truck.x,
           designPlan.truck.y,
           designPlan.truck.size || 100,
-          designPlan.truck.rotation || 0
+          designPlan.truck.rotation || 0,
         );
       }
 
@@ -198,7 +198,7 @@ const DesignPlan = () => {
           designPlan.loadArrow.x,
           designPlan.loadArrow.y,
           100,
-          designPlan.loadArrow.rotation
+          designPlan.loadArrow.rotation,
         );
       }
 
@@ -214,7 +214,7 @@ const DesignPlan = () => {
           designPlan.windArrow.x,
           designPlan.windArrow.y,
           200,
-          designPlan.windArrow.rotation
+          designPlan.windArrow.rotation,
         );
       }
     };
@@ -285,7 +285,14 @@ const DesignPlan = () => {
       }
       redrawCanvas();
     },
-    [tool, lineColor, designPlan, updateDesignPlan, dropZoneCount, redrawCanvas]
+    [
+      tool,
+      lineColor,
+      designPlan,
+      updateDesignPlan,
+      dropZoneCount,
+      redrawCanvas,
+    ],
   );
 
   // Handle mouse move (drawing lines)
@@ -305,7 +312,7 @@ const DesignPlan = () => {
       }));
       redrawCanvas();
     },
-    [isDrawing, tool, redrawCanvas]
+    [isDrawing, tool, redrawCanvas],
   );
 
   // Handle mouse up (finish drawing)
@@ -365,7 +372,7 @@ const DesignPlan = () => {
       !designPlan.windArrow
     ) {
       setError(
-        "Please add a truck, at least one drop zone, load arrow, driver position, and wind direction."
+        "Please add a truck, at least one drop zone, load arrow, driver position, and wind direction.",
       );
       return;
     }
@@ -466,6 +473,14 @@ const DesignPlan = () => {
           <div className="focused-toolbar">
             <div className="toolbar-content">
               <button
+                className={`btn btn-tool ${tool === "site" ? "active" : ""}`}
+                onClick={() => setTool("site")}
+                title="Site"
+              >
+                <span className="btn-icon">🏢</span>
+                <span className="btn-text">Site</span>
+              </button>
+              <button
                 className={`btn btn-tool ${tool === "truck" ? "active" : ""}`}
                 onClick={() => setTool("truck")}
                 title="Truck"
@@ -539,14 +554,6 @@ const DesignPlan = () => {
                 <span className="btn-icon">💨</span>
                 <span className="btn-text">Wind Arrow</span>
               </button>
-              <button
-                className={`btn btn-tool ${tool === "site" ? "active" : ""}`}
-                onClick={() => setTool("site")}
-                title="Site"
-              >
-                <span className="btn-icon">🏢</span>
-                <span className="btn-text">Site</span>
-              </button>
             </div>
           </div>
         </>
@@ -585,7 +592,7 @@ const DesignPlan = () => {
                       onChange={(e) =>
                         handleRotationChange(
                           "truck",
-                          parseFloat(e.target.value)
+                          parseFloat(e.target.value),
                         )
                       }
                       className="rotation-slider"
@@ -606,7 +613,7 @@ const DesignPlan = () => {
                         handleSizeChange(
                           "truck",
                           parseFloat(e.target.value) -
-                            (designPlan.truck?.size || 100)
+                            (designPlan.truck?.size || 100),
                         )
                       }
                       className="size-slider"
@@ -648,7 +655,7 @@ const DesignPlan = () => {
                         handleSizeChange(
                           "site",
                           parseFloat(e.target.value) -
-                            (designPlan.site?.size || 100)
+                            (designPlan.site?.size || 100),
                         )
                       }
                       className="size-slider"
@@ -671,7 +678,7 @@ const DesignPlan = () => {
                     onChange={(e) =>
                       handleRotationChange(
                         "loadArrow",
-                        parseFloat(e.target.value)
+                        parseFloat(e.target.value),
                       )
                     }
                     className="rotation-slider"
@@ -693,7 +700,7 @@ const DesignPlan = () => {
                     onChange={(e) =>
                       handleRotationChange(
                         "windArrow",
-                        parseFloat(e.target.value)
+                        parseFloat(e.target.value),
                       )
                     }
                     className="rotation-slider"
@@ -733,7 +740,7 @@ const DesignPlan = () => {
               className="btn btn-close"
               onClick={() => setIsFocused(false)}
             >
-              close
+              Done
             </button>
           </div>
         </div>
