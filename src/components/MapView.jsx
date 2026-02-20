@@ -7,7 +7,7 @@ import "./MapView.css";
 
 const MapView = () => {
   const navigate = useNavigate();
-  const { mapCenter, updateMapCenter, updateMapScreenshot } = useDelivery();
+  const { mapCenter, updateMapCenter, updateMapScreenshot, formData, updateFormData } = useDelivery();
 
   const [error, setError] = useState(null);
   const mapRef = useRef(null);
@@ -130,9 +130,13 @@ const MapView = () => {
           mapRef.current.panTo({ lat, lng });
           mapRef.current.setZoom(18);
         }
+        // Save the searched address into the form context
+        if (place.formatted_address) {
+          updateFormData({ ...formData, clientAddress: place.formatted_address });
+        }
       }
     }
-  }, [updateMapCenter]);
+  }, [updateMapCenter, updateFormData, formData]);
 
   // Capture map screenshot and navigate to design plan
   const handleGoToDesignPlan = async () => {
