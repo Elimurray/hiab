@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { GoogleMap } from "@react-google-maps/api";
+import { GoogleMap, Autocomplete } from "@react-google-maps/api";
 import { useDelivery } from "../context/DeliveryContext";
 import html2canvas from "html2canvas";
 import "./MapView.css";
@@ -9,8 +9,10 @@ const MapView = () => {
   const navigate = useNavigate();
   const { mapCenter, updateMapCenter, updateMapScreenshot } = useDelivery();
 
-  const [error, setError] = useState(null); // State for geolocation errors
+  const [error, setError] = useState(null);
   const mapRef = useRef(null);
+  const autocompleteRef = useRef(null);
+  const getCurrentLocationRef = useRef(null);
 
   const mapContainerStyle = {
     width: "100%",
@@ -27,52 +29,103 @@ const MapView = () => {
     fullscreenControl: true,
   };
 
-  // Store map instance when loaded
-  const onMapLoad = useCallback((map) => {
-    mapRef.current = map;
-  }, []);
-
-  // Function to get current location
   const getCurrentLocation = useCallback(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
           const currentLocation = { lat: latitude, lng: longitude };
-
-          // Update map center
           updateMapCenter(latitude, longitude);
-          console.log("Current location set as map center:", currentLocation);
-
-          // Pan map to current location
           if (mapRef.current) {
             mapRef.current.panTo(currentLocation);
           }
-
-          setError(null); // Clear any previous errors
+          setError(null);
         },
         (err) => {
           setError(
             err.message || "Unable to retrieve location. Please try again."
           );
-          console.error("Geolocation error:", err);
         },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0,
-        }
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     } else {
       setError("Geolocation is not supported by this browser.");
-      console.error("Geolocation not supported");
     }
   }, [updateMapCenter]);
+
+  // Keep ref in sync so onMapLoad closure always calls the latest version
+  getCurrentLocationRef.current = getCurrentLocation;
+
+  // Store map instance and add custom location control button
+  const onMapLoad = useCallback((map) => {
+    mapRef.current = map;
+
+    // Create a Google Maps-style "My Location" button
+    const locationButton = document.createElement("button");
+    locationButton.title = "My Location";
+    locationButton.type = "button";
+    locationButton.style.cssText = `
+      background: white;
+      border: none;
+      border-radius: 2px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      cursor: pointer;
+      margin: 10px;
+      padding: 0;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      outline: none;
+    `;
+
+    // Crosshair / target SVG matching Google Maps style
+    locationButton.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="4" fill="#1a73e8"/>
+        <path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="#1a73e8" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    `;
+
+    locationButton.addEventListener("click", () => {
+      getCurrentLocationRef.current();
+    });
+    locationButton.addEventListener("mouseenter", () => {
+      locationButton.style.background = "#f8f9fa";
+    });
+    locationButton.addEventListener("mouseleave", () => {
+      locationButton.style.background = "white";
+    });
+
+    map.controls[window.google.maps.ControlPosition.RIGHT_BOTTOM].push(
+      locationButton
+    );
+  }, []); // empty deps — runs only once when map first mounts
 
   // Fetch current location on mount
   useEffect(() => {
     getCurrentLocation();
-  }, []); // Empty dependency array
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const onAutocompleteLoad = useCallback((autocomplete) => {
+    autocompleteRef.current = autocomplete;
+  }, []);
+
+  const onPlaceChanged = useCallback(() => {
+    if (autocompleteRef.current) {
+      const place = autocompleteRef.current.getPlace();
+      if (place.geometry) {
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+        updateMapCenter(lat, lng);
+        if (mapRef.current) {
+          mapRef.current.panTo({ lat, lng });
+          mapRef.current.setZoom(18);
+        }
+      }
+    }
+  }, [updateMapCenter]);
 
   // Capture map screenshot and navigate to design plan
   const handleGoToDesignPlan = async () => {
@@ -81,7 +134,6 @@ const MapView = () => {
         const mapElement = document.querySelector(".map-wrapper > div");
 
         if (mapElement) {
-          // 1️⃣ Find and mark Google controls to ignore
           const googleControls = mapElement.querySelectorAll(
             ".gmnoprint, .gm-style-cc, .gm-style button, .gm-fullscreen-control"
           );
@@ -89,7 +141,6 @@ const MapView = () => {
             el.setAttribute("data-html2canvas-ignore", "true")
           );
 
-          // 2️⃣ Capture clean map screenshot
           const canvas = await html2canvas(mapElement, {
             useCORS: true,
             allowTaint: true,
@@ -97,22 +148,15 @@ const MapView = () => {
             scale: 2,
           });
 
-          // 3️⃣ Restore controls (optional, for safety)
           googleControls.forEach((el) =>
             el.removeAttribute("data-html2canvas-ignore")
           );
 
-          // 4️⃣ Save image + map center
           const screenshot = canvas.toDataURL("image/png");
           updateMapScreenshot(screenshot);
-          console.log("Map screenshot captured");
 
           const center = mapRef.current.getCenter();
           updateMapCenter(center.lat(), center.lng());
-          console.log("Map center saved:", {
-            lat: center.lat(),
-            lng: center.lng(),
-          });
 
           navigate("/design-plan");
         }
@@ -147,6 +191,18 @@ const MapView = () => {
       )}
 
       <div className="map-wrapper">
+        <div className="map-search-overlay">
+          <Autocomplete
+            onLoad={onAutocompleteLoad}
+            onPlaceChanged={onPlaceChanged}
+          >
+            <input
+              type="text"
+              placeholder="Search for a location..."
+              className="map-search-input"
+            />
+          </Autocomplete>
+        </div>
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
           center={mapCenter}
@@ -157,9 +213,6 @@ const MapView = () => {
       </div>
 
       <div className="button-container">
-        <button className="btn btn-secondary" onClick={getCurrentLocation}>
-          Use Current Location
-        </button>
         <button className="btn btn-primary" onClick={handleGoToDesignPlan}>
           Go to Design Plan →
         </button>

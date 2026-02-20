@@ -66,6 +66,37 @@
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   margin-bottom: 20px;
+  position: relative;
+}
+
+.map-search-overlay {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  width: min(420px, calc(100% - 80px));
+}
+
+.map-search-input {
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  outline: none;
+  background: white;
+  color: #1f2937;
+  box-sizing: border-box;
+}
+
+.map-search-input::placeholder {
+  color: #9ca3af;
+}
+
+.map-search-input:focus {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
 }
 
 .button-container {

@@ -7,11 +7,14 @@ import DeliveryForm from "./components/DeliveryForm";
 import ReviewPage from "./components/ReviewPage";
 import "./App.css";
 
+const LIBRARIES = ["places"];
+
 function App() {
   return (
     <DeliveryProvider>
       <LoadScript
         googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+        libraries={LIBRARIES}
         loadingElement={<div>Loading Maps...</div>}
       >
         <BrowserRouter>
