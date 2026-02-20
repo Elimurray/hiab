@@ -4,8 +4,9 @@ import cartersLogo from "../assets/Carters_Horizontal_transparent.png";
 import "./Navbar.css";
 
 export default function Navbar() {
-  const { instance } = useMsal();
+  const { instance, accounts } = useMsal();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const userName = accounts[0]?.name || accounts[0]?.username || "";
 
   const handleSignOut = () => {
     instance.logoutRedirect().catch(console.error);
@@ -16,10 +17,13 @@ export default function Navbar() {
       <nav className="navbar">
         <img src={cartersLogo} alt="Carter's" className="navbar-logo" />
 
-        {/* Desktop sign out */}
-        <button className="navbar-signout desktop-only" onClick={handleSignOut}>
-          Sign out
-        </button>
+        {/* Desktop: name + sign out */}
+        <div className="navbar-user desktop-only">
+          {userName && <span className="navbar-username">{userName}</span>}
+          <button className="navbar-signout" onClick={handleSignOut}>
+            Sign out
+          </button>
+        </div>
 
         {/* Mobile burger */}
         <button
@@ -50,6 +54,7 @@ export default function Navbar() {
         >
           ✕
         </button>
+        {userName && <span className="drawer-username">{userName}</span>}
         <button className="drawer-signout" onClick={handleSignOut}>
           Sign out
         </button>

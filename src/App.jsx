@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { LoadScript } from "@react-google-maps/api";
 import { DeliveryProvider } from "./context/DeliveryContext";
 import MapView from "./components/MapView";
@@ -9,6 +10,14 @@ import "./App.css";
 
 const LIBRARIES = ["places"];
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
 function App() {
   return (
     <DeliveryProvider>
@@ -18,6 +27,7 @@ function App() {
         loadingElement={<div>Loading Maps...</div>}
       >
         <BrowserRouter>
+          <ScrollToTop />
           <div className="App">
             <Routes>
               <Route path="/" element={<MapView />} />

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useMsal } from "@azure/msal-react";
 import { useDelivery } from "../context/DeliveryContext";
 import jsPDF from "jspdf";
 import truckIcon from "../utils/truck.svg";
@@ -29,6 +30,7 @@ const loadImage = (src) =>
 
 const DeliveryForm = () => {
   const navigate = useNavigate();
+  const { accounts } = useMsal();
   const {
     formData: contextFormData,
     updateFormData,
@@ -36,7 +38,11 @@ const DeliveryForm = () => {
     mapScreenshot,
   } = useDelivery();
 
-  const [formData, setFormData] = useState(contextFormData);
+  const userName = accounts[0]?.name || accounts[0]?.username || "";
+  const [formData, setFormData] = useState({
+    ...contextFormData,
+    driverName: contextFormData.driverName || userName,
+  });
   const [errors, setErrors] = useState({});
   const [generating, setGenerating] = useState(false);
 

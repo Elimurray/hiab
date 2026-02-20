@@ -16,6 +16,26 @@
   width: auto;
 }
 
+/* Desktop user area */
+.navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbar-username {
+  font-size: 14px;
+  color: #555;
+}
+
+/* Drawer username */
+.drawer-username {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+
 /* Desktop sign out button */
 .navbar-signout {
   padding: 6px 16px;
