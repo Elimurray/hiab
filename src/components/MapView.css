@@ -76,6 +76,7 @@
   transform: translateX(-50%);
   z-index: 10;
   width: min(420px, calc(100% - 80px));
+  pointer-events: none;
 }
 
 .map-search-input {
@@ -89,6 +90,7 @@
   background: white;
   color: #1f2937;
   box-sizing: border-box;
+  pointer-events: auto;
 }
 
 .map-search-input::placeholder {

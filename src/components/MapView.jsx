@@ -13,6 +13,7 @@ const MapView = () => {
   const mapRef = useRef(null);
   const autocompleteRef = useRef(null);
   const getCurrentLocationRef = useRef(null);
+  const locationButtonAddedRef = useRef(false);
 
   const mapContainerStyle = {
     width: "100%",
@@ -25,8 +26,12 @@ const MapView = () => {
     disableDefaultUI: false,
     zoomControl: true,
     streetViewControl: false,
-    mapTypeControl: true,
+    mapTypeControl: false,
     fullscreenControl: true,
+    fullscreenControlOptions: {
+      position: window.google.maps.ControlPosition.BOTTOM_RIGHT,
+    },
+    gestureHandling: "greedy",
   };
 
   const getCurrentLocation = useCallback(() => {
@@ -59,6 +64,8 @@ const MapView = () => {
   // Store map instance and add custom location control button
   const onMapLoad = useCallback((map) => {
     mapRef.current = map;
+    if (locationButtonAddedRef.current) return;
+    locationButtonAddedRef.current = true;
 
     // Create a Google Maps-style "My Location" button
     const locationButton = document.createElement("button");
@@ -131,7 +138,7 @@ const MapView = () => {
   const handleGoToDesignPlan = async () => {
     if (mapRef.current) {
       try {
-        const mapElement = document.querySelector(".map-wrapper > div");
+        const mapElement = document.querySelector(".google-map-container");
 
         if (mapElement) {
           const googleControls = mapElement.querySelectorAll(
@@ -205,6 +212,7 @@ const MapView = () => {
         </div>
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
+          mapContainerClassName="google-map-container"
           center={mapCenter}
           zoom={18}
           options={mapOptions}
