@@ -6,7 +6,7 @@
 
 html,
 body {
-  overscroll-behavior: none;
+  overscroll-behavior-x: none; /* still block horizontal overscroll */
 }
 
 .App {

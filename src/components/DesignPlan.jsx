@@ -58,15 +58,18 @@ const DesignPlan = () => {
     });
   }, []);
 
-  // Prevent scrolling when focused
+  // Prevent scrolling and pull-to-refresh only while canvas is focused
   useEffect(() => {
     if (isFocused) {
       document.body.style.overflow = "hidden";
+      document.body.style.overscrollBehaviorY = "none";
     } else {
       document.body.style.overflow = "auto";
+      document.body.style.overscrollBehaviorY = "auto";
     }
     return () => {
       document.body.style.overflow = "auto";
+      document.body.style.overscrollBehaviorY = "auto";
     };
   }, [isFocused]);
 
