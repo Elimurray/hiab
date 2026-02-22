@@ -115,6 +115,14 @@ const MapView = () => {
     getCurrentLocation();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Prevent body bounce on the map page — the map handles its own touch events
+  useEffect(() => {
+    document.body.style.overscrollBehavior = "none";
+    return () => {
+      document.body.style.overscrollBehavior = "";
+    };
+  }, []);
+
   const onAutocompleteLoad = useCallback((autocomplete) => {
     autocompleteRef.current = autocomplete;
   }, []);
