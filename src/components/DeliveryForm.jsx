@@ -346,16 +346,10 @@ const DeliveryForm = () => {
   };
 
   const handleSave = () => {
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    if (isIOS) {
-      // iOS Safari blocks <a download> for data URIs — open in new tab so user can long-press to save
-      window.open(imageDataUrl, "_blank");
-    } else {
-      const link = document.createElement("a");
-      link.download = `Hiab-Site-Plan-${formData.clientName.replace(/\s+/g, "-")}.png`;
-      link.href = imageDataUrl;
-      link.click();
-    }
+    const link = document.createElement("a");
+    link.download = `Hiab-Site-Plan-${formData.clientName.replace(/\s+/g, "-")}.png`;
+    link.href = imageDataUrl;
+    link.click();
   };
 
   const handleBack = () => {
@@ -371,18 +365,20 @@ const DeliveryForm = () => {
         <div className="image-preview-card">
           <h2 className="image-preview-title">Site Plan Ready</h2>
 
+          {isIOS && (
+            <p className="image-preview-hint image-preview-hint--top">
+              Hold down the image below and tap <strong>Save to Photos</strong>.
+            </p>
+          )}
+
           <div className="image-preview-wrapper">
             <img src={imageDataUrl} alt="Generated site plan" className="image-preview-img" />
           </div>
 
-          <button className="btn btn-save" onClick={handleSave}>
-            {isIOS ? "Open Image (then long-press to Save)" : "Save Image"}
-          </button>
-
-          {isIOS && (
-            <p className="image-preview-hint">
-              Tap the button above, then long-press the image and choose <strong>Add to Photos</strong>.
-            </p>
+          {!isIOS && (
+            <button className="btn btn-save" onClick={handleSave}>
+              Save Image
+            </button>
           )}
 
           <button
