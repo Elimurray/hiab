@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
 import { useDelivery } from "../context/DeliveryContext";
 import cartersLogo from "../assets/Carters_Horizontal_transparent.png";
-import jsPDF from "jspdf";
 import truckIcon from "../utils/truck.svg";
 import coneIcon from "../utils/cone.svg";
 import driverIcon from "../utils/driver.svg";
@@ -29,6 +28,27 @@ const loadImage = (src) =>
     img.src = src;
   });
 
+// Draws wrapped text, returns the new Y position after the last line
+const wrapText = (ctx, text, x, y, maxW, lineH) => {
+  const words = (text || "—").split(" ");
+  let line = "";
+  for (const word of words) {
+    const test = line ? `${line} ${word}` : word;
+    if (ctx.measureText(test).width > maxW && line) {
+      ctx.fillText(line, x, y);
+      y += lineH;
+      line = word;
+    } else {
+      line = test;
+    }
+  }
+  if (line) {
+    ctx.fillText(line, x, y);
+    y += lineH;
+  }
+  return y;
+};
+
 const DeliveryForm = () => {
   const navigate = useNavigate();
   const { accounts } = useMsal();
@@ -46,6 +66,7 @@ const DeliveryForm = () => {
   });
   const [errors, setErrors] = useState({});
   const [generating, setGenerating] = useState(false);
+  const [imageDataUrl, setImageDataUrl] = useState(null);
 
   useEffect(() => {
     if (
@@ -91,7 +112,6 @@ const DeliveryForm = () => {
     const ctx = canvas.getContext("2d");
     ctx.drawImage(mapImg, 0, 0);
 
-    // Load all icon images in parallel
     const iconEntries = await Promise.all(
       Object.entries(ICON_SRCS).map(async ([key, src]) => [key, await loadImage(src)])
     );
@@ -107,7 +127,6 @@ const DeliveryForm = () => {
       ctx.restore();
     };
 
-    // Lines
     designPlan.lines.forEach((line) => {
       ctx.beginPath();
       ctx.strokeStyle = line.color;
@@ -119,17 +138,13 @@ const DeliveryForm = () => {
       ctx.stroke();
     });
 
-    // Site
     if (designPlan.site) {
       drawIcon("site", designPlan.site.x, designPlan.site.y, designPlan.site.size || 200, designPlan.site.rotation || 0);
     }
-
-    // Truck
     if (designPlan.truck) {
       drawIcon("truck", designPlan.truck.x, designPlan.truck.y, designPlan.truck.size || 100, designPlan.truck.rotation || 0);
     }
 
-    // Cones
     designPlan.cones.forEach((cone) => {
       ctx.fillStyle = "#e67b16";
       ctx.beginPath();
@@ -137,7 +152,6 @@ const DeliveryForm = () => {
       ctx.fill();
     });
 
-    // Drop zones
     designPlan.dropZones.forEach((zone) => {
       ctx.fillStyle = "#EF4444";
       ctx.beginPath();
@@ -150,17 +164,12 @@ const DeliveryForm = () => {
       ctx.fillText(zone.number.toString(), zone.x, zone.y);
     });
 
-    // Load arrow
     if (designPlan.loadArrow) {
       drawIcon("loadArrow", designPlan.loadArrow.x, designPlan.loadArrow.y, 100, designPlan.loadArrow.rotation);
     }
-
-    // Driver
     if (designPlan.driver) {
       drawIcon("driver", designPlan.driver.x, designPlan.driver.y, 60, 0);
     }
-
-    // Wind arrow
     if (designPlan.windArrow) {
       drawIcon("windArrow", designPlan.windArrow.x, designPlan.windArrow.y, 200, designPlan.windArrow.rotation);
     }
@@ -168,153 +177,156 @@ const DeliveryForm = () => {
     return canvas;
   };
 
-  const generatePDF = async (data) => {
-    const canvas = await buildAnnotatedCanvas();
+  const generateImage = async (data) => {
+    const mapCanvas = await buildAnnotatedCanvas();
 
-    const pdf = new jsPDF("p", "mm", "a4");
-    const pageW = pdf.internal.pageSize.getWidth();   // 210
-    const pageH = pdf.internal.pageSize.getHeight();  // 297
-    const margin = 10;
+    // Canvas dimensions (×2 for retina sharpness)
+    const SCALE = 2;
+    const W = 1200;
+    const H = 1700;
 
-    // Two-column layout
-    const leftW = 82;
-    const gap = 6;
-    const rightX = margin + leftW + gap;
-    const rightW = pageW - rightX - margin;           // ~102mm
+    const canvas = document.createElement("canvas");
+    canvas.width = W * SCALE;
+    canvas.height = H * SCALE;
+    const ctx = canvas.getContext("2d");
+    ctx.scale(SCALE, SCALE);
 
-    // ── Header ──────────────────────────────────────────────────────────────
-    // Carter's logo (left-aligned)
+    // White background
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, W, H);
+
+    const margin = 40;
+
+    // ── Header ────────────────────────────────────────────────────────────────
     const logoImg = await loadImage(cartersLogo);
     if (logoImg) {
-      const logoH = 10;
+      const logoH = 44;
       const logoW = logoH * (logoImg.naturalWidth / logoImg.naturalHeight);
-      const c = document.createElement("canvas");
-      c.width = logoImg.naturalWidth;
-      c.height = logoImg.naturalHeight;
-      c.getContext("2d").drawImage(logoImg, 0, 0);
-      pdf.addImage(c.toDataURL("image/png"), "PNG", margin, margin, logoW, logoH);
+      ctx.drawImage(logoImg, margin, margin, logoW, logoH);
     }
 
-    // Title (right-aligned in header)
-    pdf.setFontSize(14);
-    pdf.setFont("helvetica", "bold");
-    pdf.setTextColor(31, 41, 55);
-    pdf.text("HIAB DELIVERY SITE PLAN", pageW - margin, margin + 6, { align: "right" });
-    pdf.setFontSize(8);
-    pdf.setFont("helvetica", "normal");
-    pdf.setTextColor(107, 114, 128);
-    pdf.text("Drop-off Location & Details", pageW - margin, margin + 11, { align: "right" });
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#1F2937";
+    ctx.font = "bold 26px Arial";
+    ctx.fillText("HIAB DELIVERY SITE PLAN", W - margin, margin + 22);
+    ctx.fillStyle = "#6B7280";
+    ctx.font = "15px Arial";
+    ctx.fillText("Drop-off Location & Details", W - margin, margin + 44);
+    ctx.textAlign = "left";
 
-    // Divider under header
-    const headerH = 24;
-    pdf.setDrawColor(220, 220, 220);
-    pdf.line(margin, margin + headerH, pageW - margin, margin + headerH);
+    const headerBottom = margin + 60;
+    ctx.strokeStyle = "#E5E7EB";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(margin, headerBottom);
+    ctx.lineTo(W - margin, headerBottom);
+    ctx.stroke();
 
-    // ── Content starts here ──────────────────────────────────────────────────
-    const contentTop = margin + headerH + 5;
-    const contentH = pageH - contentTop - 14; // leave room for footer
+    // ── Two-column layout ──────────────────────────────────────────────────────
+    const contentTop = headerBottom + 24;
+    const leftW = 300;
+    const gap = 28;
+    const rightX = margin + leftW + gap;
+    const rightW = W - rightX - margin;
+
     let leftY = contentTop;
 
     const sectionTitle = (title) => {
-      pdf.setFontSize(7.5);
-      pdf.setFont("helvetica", "bold");
-      pdf.setTextColor(107, 114, 128);
-      pdf.text(title.toUpperCase(), margin, leftY);
-      leftY += 3.5;
-      pdf.setDrawColor(220, 220, 220);
-      pdf.line(margin, leftY, margin + leftW, leftY);
-      leftY += 4;
+      ctx.fillStyle = "#6B7280";
+      ctx.font = "bold 11px Arial";
+      ctx.fillText(title.toUpperCase(), margin, leftY);
+      leftY += 8;
+      ctx.strokeStyle = "#E5E7EB";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(margin, leftY);
+      ctx.lineTo(margin + leftW, leftY);
+      ctx.stroke();
+      leftY += 16;
     };
 
     const field = (label, value) => {
-      pdf.setFontSize(7);
-      pdf.setFont("helvetica", "bold");
-      pdf.setTextColor(107, 114, 128);
-      pdf.text(label, margin, leftY);
-      leftY += 3.5;
-      pdf.setFont("helvetica", "normal");
-      pdf.setTextColor(31, 41, 55);
-      pdf.setFontSize(8.5);
-      const wrapped = pdf.splitTextToSize(value || "—", leftW);
-      pdf.text(wrapped, margin, leftY);
-      leftY += wrapped.length * 4.2 + 3;
+      ctx.fillStyle = "#6B7280";
+      ctx.font = "bold 10px Arial";
+      ctx.fillText(label, margin, leftY);
+      leftY += 16;
+      ctx.fillStyle = "#1F2937";
+      ctx.font = "14px Arial";
+      leftY = wrapText(ctx, value, margin, leftY, leftW, 20);
+      leftY += 10;
     };
 
-    // Delivery info
     sectionTitle("Delivery Information");
     field("Driver Name", data.driverName);
     field("Client Name", data.clientName);
     field("Client Address", data.clientAddress);
     field("Delivery Date", new Date(data.date).toLocaleDateString("en-NZ", { day: "2-digit", month: "long", year: "numeric" }));
 
-    leftY += 2;
+    leftY += 8;
     sectionTitle("Load Details");
     field("Description", data.loadDescription);
     field("Weight", `${data.weight} kg`);
 
-    leftY += 2;
+    leftY += 8;
     sectionTitle("Annotations");
     field("Drop Zones", `${designPlan.dropZones.length}`);
     field("Cones", `${designPlan.cones.length}`);
     field("Lines", `${designPlan.lines.length}`);
 
     if (data.accessNotes) {
-      leftY += 2;
+      leftY += 8;
       sectionTitle("Access Notes");
-      pdf.setFontSize(8);
-      pdf.setFont("helvetica", "normal");
-      pdf.setTextColor(31, 41, 55);
-      const noteLines = pdf.splitTextToSize(data.accessNotes, leftW);
-      pdf.text(noteLines, margin, leftY);
-      leftY += noteLines.length * 4.2 + 3;
+      ctx.fillStyle = "#1F2937";
+      ctx.font = "13px Arial";
+      leftY = wrapText(ctx, data.accessNotes, margin, leftY, leftW, 19);
     }
 
     if (data.specialInstructions) {
-      leftY += 2;
+      leftY += 8;
       sectionTitle("Special Instructions");
-      pdf.setFontSize(8);
-      pdf.setFont("helvetica", "normal");
-      pdf.setTextColor(31, 41, 55);
-      const instrLines = pdf.splitTextToSize(data.specialInstructions, leftW);
-      pdf.text(instrLines, margin, leftY);
+      ctx.fillStyle = "#1F2937";
+      ctx.font = "13px Arial";
+      leftY = wrapText(ctx, data.specialInstructions, margin, leftY, leftW, 19);
     }
 
-    // ── Right column: site plan image ────────────────────────────────────────
-    pdf.setFontSize(7.5);
-    pdf.setFont("helvetica", "bold");
-    pdf.setTextColor(107, 114, 128);
-    pdf.text("SITE PLAN", rightX, contentTop - 1);
-    pdf.setDrawColor(220, 220, 220);
-    pdf.line(rightX, contentTop + 2.5, rightX + rightW, contentTop + 2.5);
+    // ── Right column: site plan image ─────────────────────────────────────────
+    ctx.fillStyle = "#6B7280";
+    ctx.font = "bold 11px Arial";
+    ctx.fillText("SITE PLAN", rightX, contentTop - 4);
+    ctx.strokeStyle = "#E5E7EB";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(rightX, contentTop + 4);
+    ctx.lineTo(rightX + rightW, contentTop + 4);
+    ctx.stroke();
 
-    const imgData = canvas.toDataURL("image/png");
-    const imgAreaTop = contentTop + 6;
-    const imgAreaH = contentH - 6;
-    let iw = canvas.width;
-    let ih = canvas.height;
-    const scale = Math.min(rightW / iw, imgAreaH / ih);
-    iw *= scale;
-    ih *= scale;
+    const imgTop = contentTop + 18;
+    const imgAreaH = H - imgTop - 60;
+    let iw = mapCanvas.width;
+    let ih = mapCanvas.height;
+    const imgScale = Math.min(rightW / iw, imgAreaH / ih);
+    iw *= imgScale;
+    ih *= imgScale;
     const imgX = rightX + (rightW - iw) / 2;
-    const imgY = imgAreaTop + (imgAreaH - ih) / 2;
-    pdf.addImage(imgData, "PNG", imgX, imgY, iw, ih);
+    const imgY = imgTop + (imgAreaH - ih) / 2;
+    ctx.drawImage(mapCanvas, imgX, imgY, iw, ih);
 
-    // Thin border around the image
-    pdf.setDrawColor(200, 200, 200);
-    pdf.rect(imgX, imgY, iw, ih);
+    ctx.strokeStyle = "#D1D5DB";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(imgX, imgY, iw, ih);
 
-    // ── Footer ───────────────────────────────────────────────────────────────
-    pdf.setFontSize(7);
-    pdf.setFont("helvetica", "normal");
-    pdf.setTextColor(150, 150, 150);
-    pdf.text(
+    // ── Footer ────────────────────────────────────────────────────────────────
+    ctx.fillStyle = "#9CA3AF";
+    ctx.font = "11px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(
       `Generated ${new Date().toLocaleString()} | HIAB Site Planner — Carter's`,
-      pageW / 2,
-      pageH - 5,
-      { align: "center" }
+      W / 2,
+      H - 22
     );
+    ctx.textAlign = "left";
 
-    pdf.save(`Hiab-Site-Plan-${data.clientName.replace(/\s/g, "-")}.pdf`);
+    return canvas.toDataURL("image/png");
   };
 
   const handleSubmit = async (e) => {
@@ -323,12 +335,26 @@ const DeliveryForm = () => {
     updateFormData(formData);
     setGenerating(true);
     try {
-      await generatePDF(formData);
+      const dataUrl = await generateImage(formData);
+      setImageDataUrl(dataUrl);
     } catch (err) {
-      console.error("PDF generation failed:", err);
-      alert("Error generating PDF. Please try again.");
+      console.error("Image generation failed:", err);
+      alert("Error generating image. Please try again.");
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const handleSave = () => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    if (isIOS) {
+      // iOS Safari blocks <a download> for data URIs — open in new tab so user can long-press to save
+      window.open(imageDataUrl, "_blank");
+    } else {
+      const link = document.createElement("a");
+      link.download = `Hiab-Site-Plan-${formData.clientName.replace(/\s+/g, "-")}.png`;
+      link.href = imageDataUrl;
+      link.click();
     }
   };
 
@@ -336,6 +362,39 @@ const DeliveryForm = () => {
     updateFormData(formData);
     navigate("/design-plan");
   };
+
+  // ── Image preview overlay ──────────────────────────────────────────────────
+  if (imageDataUrl) {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    return (
+      <div className="image-preview-overlay">
+        <div className="image-preview-card">
+          <h2 className="image-preview-title">Site Plan Ready</h2>
+
+          <div className="image-preview-wrapper">
+            <img src={imageDataUrl} alt="Generated site plan" className="image-preview-img" />
+          </div>
+
+          <button className="btn btn-save" onClick={handleSave}>
+            {isIOS ? "Open Image (then long-press to Save)" : "Save Image"}
+          </button>
+
+          {isIOS && (
+            <p className="image-preview-hint">
+              Tap the button above, then long-press the image and choose <strong>Add to Photos</strong>.
+            </p>
+          )}
+
+          <button
+            className="btn btn-secondary image-preview-back"
+            onClick={() => setImageDataUrl(null)}
+          >
+            ← Back to Form
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="form-container">
@@ -491,7 +550,7 @@ const DeliveryForm = () => {
             ← Back to Design Plan
           </button>
           <button type="submit" className="btn btn-primary" disabled={generating}>
-            {generating ? "Generating PDF..." : "Generate PDF"}
+            {generating ? "Generating..." : "Generate Image"}
           </button>
         </div>
       </form>
