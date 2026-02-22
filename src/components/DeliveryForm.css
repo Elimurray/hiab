@@ -162,6 +162,19 @@
   background: #059669;
 }
 
+/* ── Personnel rows ──────────────────────────────────────────────────────── */
+.personnel-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.personnel-row input {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+}
+
 /* ── Image preview overlay ───────────────────────────────────────────────── */
 .image-preview-overlay {
   position: fixed;

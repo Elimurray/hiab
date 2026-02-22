@@ -112,23 +112,25 @@
   align-items: center;
   gap: 4px;
   padding: 8px 12px;
-  transition: all 0.2s ease;
-}
-
-.btn-tool:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.btn-tool.active {
-  background: #2563eb;
-  color: white;
-  border-color: #1d4ed8;
 }
 
 .btn-icon {
   font-size: 24px;
   line-height: 1;
+}
+
+.btn-icon-img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Invert icons to white when button is active (white on blue) */
+
+/* Wind PNG is white — invert it to black so it's visible on the light button */
+.btn-tool img.btn-icon-img[alt="Wind Arrow"] {
+  filter: invert(1);
 }
 
 .btn-text {
@@ -296,20 +298,23 @@
 
 .btn-tool.active {
   background: #2563eb;
-  color: white;
   border-color: #1d4ed8;
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.35);
 }
 
 .btn-tool {
-  transition: all 0.2s ease;
-  background: white;
-  border: 2px solid #d1d5db;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+  color: #000000;
 }
 
-.btn-tool:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
+/* .btn-tool:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.13);
+} */
 
 .rotation-panel {
   position: relative;
@@ -474,8 +479,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid #d1d5db;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
     color: #000000;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
   }
 
   /* Canvas takes all remaining space */
@@ -609,12 +616,28 @@
     display: none;
   }
 
+  .btn-icon-img {
+    display: none;
+  }
+
   .btn-text {
     display: inline;
   }
 
   .legend-items {
     display: none;
+  }
+
+  .btn-tool {
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
+  .toolbar-content {
+    gap: 6px;
   }
   .bottom-container {
     height: 100px;

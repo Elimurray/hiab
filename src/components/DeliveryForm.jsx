@@ -7,7 +7,7 @@ import truckIcon from "../utils/truck.svg";
 import coneIcon from "../utils/cone.svg";
 import driverIcon from "../utils/driver.svg";
 import loadArrowIcon from "../utils/loadArrow.svg";
-import windArrowIcon from "../utils/windArrow.svg";
+import windArrowIcon from "../utils/wind.png";
 import siteIcon from "../utils/site.svg";
 import "./DeliveryForm.css";
 
@@ -86,6 +86,28 @@ const DeliveryForm = () => {
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
+  };
+
+  const handleNumberOfPeopleChange = (e) => {
+    const num = Math.max(0, parseInt(e.target.value) || 0);
+    setFormData((prev) => {
+      const current = prev.liftPersonnel || [];
+      let newPersonnel;
+      if (num > current.length) {
+        newPersonnel = [...current, ...Array(num - current.length).fill(null).map(() => ({ name: "", role: "" }))];
+      } else {
+        newPersonnel = current.slice(0, num);
+      }
+      return { ...prev, numberOfPeople: e.target.value, liftPersonnel: newPersonnel };
+    });
+  };
+
+  const handlePersonnelChange = (index, field, value) => {
+    setFormData((prev) => {
+      const updated = [...(prev.liftPersonnel || [])];
+      updated[index] = { ...updated[index], [field]: value };
+      return { ...prev, liftPersonnel: updated };
+    });
   };
 
   const validateForm = () => {
@@ -183,7 +205,8 @@ const DeliveryForm = () => {
     // Canvas dimensions (×2 for retina sharpness)
     const SCALE = 2;
     const W = 1200;
-    const H = 1700;
+    const personnelCount = (data.liftPersonnel || []).length;
+    const H = 1700 + Math.max(0, personnelCount - 3) * 35;
 
     const canvas = document.createElement("canvas");
     canvas.width = W * SCALE;
@@ -261,6 +284,13 @@ const DeliveryForm = () => {
     field("Client Name", data.clientName);
     field("Client Address", data.clientAddress);
     field("Despatch Note #", data.despatchNote);
+    if (data.numberOfPeople) field("# of People", data.numberOfPeople);
+    if (data.liftPersonnel && data.liftPersonnel.length > 0) {
+      data.liftPersonnel.forEach((person, i) => {
+        field(`Person ${i + 1}`, `${person.name || "—"}  –  ${person.role || "—"}`);
+      });
+    }
+    if (data.knownLiftWeights) field("Known Lift Weights", data.knownLiftWeights);
     field("Delivery Date", new Date(data.date).toLocaleDateString("en-NZ", { day: "2-digit", month: "long", year: "numeric" }));
 
     leftY += 8;
@@ -468,6 +498,58 @@ const DeliveryForm = () => {
               className={errors.despatchNote ? "error" : ""}
             />
             {errors.despatchNote && <span className="error-message">{errors.despatchNote}</span>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="numberOfPeople">
+              # of People Involved in Delivery <span className="optional">(Optional)</span>
+            </label>
+            <input
+              type="number"
+              id="numberOfPeople"
+              name="numberOfPeople"
+              value={formData.numberOfPeople}
+              onChange={handleNumberOfPeopleChange}
+              placeholder="0"
+              min="0"
+              max="20"
+            />
+          </div>
+
+          {(parseInt(formData.numberOfPeople) || 0) > 0 && (
+            <div className="form-group">
+              <label>Names &amp; Roles</label>
+              {(formData.liftPersonnel || []).map((person, idx) => (
+                <div key={idx} className="personnel-row">
+                  <input
+                    type="text"
+                    value={person.name}
+                    onChange={(e) => handlePersonnelChange(idx, "name", e.target.value)}
+                    placeholder="Name"
+                  />
+                  <input
+                    type="text"
+                    value={person.role}
+                    onChange={(e) => handlePersonnelChange(idx, "role", e.target.value)}
+                    placeholder="Role (e.g. Crane Operator, Spotter)"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="form-group">
+            <label htmlFor="knownLiftWeights">
+              Known Lift Weights <span className="optional">(Optional)</span>
+            </label>
+            <input
+              type="text"
+              id="knownLiftWeights"
+              name="knownLiftWeights"
+              value={formData.knownLiftWeights}
+              onChange={handleChange}
+              placeholder="e.g. 2.5t main beam, 1.8t secondary"
+            />
           </div>
 
           <div className="form-group">

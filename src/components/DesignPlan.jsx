@@ -5,7 +5,7 @@ import truckIcon from "../utils/truck.svg";
 import coneIcon from "../utils/cone.svg";
 import driverIcon from "../utils/driver.svg";
 import loadArrowIcon from "../utils/loadArrow.svg";
-import windArrowIcon from "../utils/windArrow.svg";
+import windArrowIcon from "../utils/wind.png";
 import siteIcon from "../utils/site.svg";
 import "./DesignPlan.css";
 
@@ -544,7 +544,7 @@ const DesignPlan = () => {
                 onClick={() => setTool("site")}
                 title="Site"
               >
-                <span className="btn-icon">🏢</span>
+                <img src={siteIcon} className="btn-icon-img" alt="Site" />
                 <span className="btn-text">Site</span>
               </button>
               <button
@@ -552,7 +552,7 @@ const DesignPlan = () => {
                 onClick={() => setTool("truck")}
                 title="Truck"
               >
-                <span className="btn-icon">🚛</span>
+                <img src={truckIcon} className="btn-icon-img" alt="Truck" />
                 <span className="btn-text">Truck</span>
               </button>
               <button
@@ -560,7 +560,7 @@ const DesignPlan = () => {
                 onClick={() => setTool("driver")}
                 title="Driver"
               >
-                <span className="btn-icon">👤</span>
+                <img src={driverIcon} className="btn-icon-img" alt="Driver" />
                 <span className="btn-text">Driver</span>
               </button>
               <button
@@ -568,7 +568,7 @@ const DesignPlan = () => {
                 onClick={() => setTool("cone")}
                 title="Cone"
               >
-                <span className="btn-icon">🗼</span>
+                <img src={coneIcon} className="btn-icon-img" alt="Cone" />
                 <span className="btn-text">Cone</span>
               </button>
               <button
@@ -576,50 +576,37 @@ const DesignPlan = () => {
                 onClick={() => setTool("line")}
                 title="Draw Line"
               >
-                <span className="btn-icon">✏️</span>
+                <svg className="btn-icon-img" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M4 20L20 4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+                  <path d="M14 4h6v6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
                 <span className="btn-text">Draw Line</span>
               </button>
-              {/* <select
-                value={lineColor}
-                onChange={(e) => setLineColor(e.target.value)}
-                disabled={tool !== "line"}
-                className="line-color-select"
-                title="Line Color"
-              >
-                <option value="#000000">Black</option>
-                <option value="#FF0000">Red</option>
-                <option value="#00FF00">Green</option>
-                <option value="#0000FF">Blue</option>
-              </select> */}
               <button
-                className={`btn btn-tool ${
-                  tool === "dropZone" ? "active" : ""
-                }`}
+                className={`btn btn-tool ${tool === "dropZone" ? "active" : ""}`}
                 onClick={() => setTool("dropZone")}
                 title="Drop Zone"
               >
-                <span className="btn-icon">📍</span>
+                <svg className="btn-icon-img" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#EF4444"/>
+                  <circle cx="12" cy="9" r="2.5" fill="white"/>
+                </svg>
                 <span className="btn-text">Drop Zone</span>
               </button>
               <button
-                className={`btn btn-tool ${
-                  tool === "loadArrow" ? "active" : ""
-                }`}
+                className={`btn btn-tool ${tool === "loadArrow" ? "active" : ""}`}
                 onClick={() => setTool("loadArrow")}
                 title="Load Arrow"
               >
-                <span className="btn-icon">⬆️</span>
+                <img src={loadArrowIcon} className="btn-icon-img" alt="Load Arrow" />
                 <span className="btn-text">Load Arrow</span>
               </button>
-
               <button
-                className={`btn btn-tool ${
-                  tool === "windArrow" ? "active" : ""
-                }`}
+                className={`btn btn-tool ${tool === "windArrow" ? "active" : ""}`}
                 onClick={() => setTool("windArrow")}
                 title="Wind Arrow"
               >
-                <span className="btn-icon">💨</span>
+                <img src={windArrowIcon} className="btn-icon-img" alt="Wind Arrow" />
                 <span className="btn-text">Wind Arrow</span>
               </button>
             </div>
