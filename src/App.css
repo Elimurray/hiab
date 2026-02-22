@@ -6,7 +6,7 @@
 
 html,
 body {
-  overscroll-behavior-x: none; /* still block horizontal overscroll */
+  overscroll-behavior: contain; /* prevent bounce/chaining without fully blocking pull-to-refresh */
 }
 
 .App {
