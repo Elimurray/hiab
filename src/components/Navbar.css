@@ -16,6 +16,10 @@
   width: auto;
 }
 
+.navbar-logo--clickable {
+  cursor: pointer;
+}
+
 /* Desktop user area */
 .navbar-user {
   display: flex;

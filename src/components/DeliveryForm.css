@@ -1,6 +1,7 @@
 .form-container {
   max-width: 800px;
   margin: 0 auto;
+  overflow-x: hidden;
 }
 
 .form-header {
@@ -73,12 +74,19 @@
 .form-group input,
 .form-group textarea {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 12px;
   border: 2px solid #d1d5db;
   border-radius: 6px;
   font-size: 1rem;
   transition: all 0.2s;
   font-family: inherit;
+}
+
+.form-group input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .form-group input:focus,

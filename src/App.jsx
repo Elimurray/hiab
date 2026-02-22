@@ -1,7 +1,6 @@
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { LoadScript } from "@react-google-maps/api";
-import { DeliveryProvider } from "./context/DeliveryContext";
 import MapView from "./components/MapView";
 import DesignPlan from "./components/DesignPlan";
 import DeliveryForm from "./components/DeliveryForm";
@@ -20,25 +19,21 @@ function ScrollToTop() {
 
 function App() {
   return (
-    <DeliveryProvider>
-      <LoadScript
-        googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
-        libraries={LIBRARIES}
-        loadingElement={<div>Loading Maps...</div>}
-      >
-        <BrowserRouter>
-          <ScrollToTop />
-          <div className="App">
-            <Routes>
-              <Route path="/" element={<MapView />} />
-              <Route path="/design-plan" element={<DesignPlan />} />
-              <Route path="/form" element={<DeliveryForm />} />
-              <Route path="/review" element={<ReviewPage />} />
-            </Routes>
-          </div>
-        </BrowserRouter>
-      </LoadScript>
-    </DeliveryProvider>
+    <LoadScript
+      googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}
+      libraries={LIBRARIES}
+      loadingElement={<div>Loading Maps...</div>}
+    >
+      <ScrollToTop />
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<MapView />} />
+          <Route path="/design-plan" element={<DesignPlan />} />
+          <Route path="/form" element={<DeliveryForm />} />
+          <Route path="/review" element={<ReviewPage />} />
+        </Routes>
+      </div>
+    </LoadScript>
   );
 }
 

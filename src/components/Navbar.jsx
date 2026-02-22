@@ -1,12 +1,21 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useMsal } from "@azure/msal-react";
+import { useDelivery } from "../context/DeliveryContext";
 import cartersLogo from "../assets/Carters_Horizontal_transparent.png";
 import "./Navbar.css";
 
 export default function Navbar() {
   const { instance, accounts } = useMsal();
+  const { resetAll } = useDelivery();
+  const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const userName = accounts[0]?.name || accounts[0]?.username || "";
+
+  const handleLogoClick = () => {
+    resetAll();
+    navigate("/");
+  };
 
   const handleSignOut = () => {
     instance.logoutRedirect().catch(console.error);
@@ -15,7 +24,7 @@ export default function Navbar() {
   return (
     <>
       <nav className="navbar">
-        <img src={cartersLogo} alt="Carter's" className="navbar-logo" />
+        <img src={cartersLogo} alt="Carter's" className="navbar-logo navbar-logo--clickable" onClick={handleLogoClick} />
 
         {/* Desktop: name + sign out */}
         <div className="navbar-user desktop-only">

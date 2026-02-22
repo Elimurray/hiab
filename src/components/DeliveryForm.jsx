@@ -76,7 +76,6 @@ const DeliveryForm = () => {
       !designPlan.driver ||
       !designPlan.windArrow
     ) {
-      alert("Please complete the design plan first!");
       navigate("/design-plan");
     }
   }, [designPlan, navigate]);
