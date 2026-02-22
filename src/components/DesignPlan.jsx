@@ -19,6 +19,7 @@ const DesignPlan = () => {
     canUndo,
   } = useDelivery();
   const canvasRef = useRef(null);
+  const lastTouchRef = useRef(0); // timestamp of last touchstart, used to suppress ghost mouse events
   const [tool, setTool] = useState(null); // Current tool: "truck", "cone", "line", "dropZone", "loadArrow", "driver", "windArrow"
   const [lineColor, setLineColor] = useState("#000000"); // Line color
   const [isDrawing, setIsDrawing] = useState(false); // Drawing state
@@ -228,6 +229,8 @@ const DesignPlan = () => {
   // Handle mouse down (start drawing or place icon)
   const handleMouseDown = useCallback(
     (e) => {
+      // Suppress ghost mouse events fired by the browser after a touch
+      if (Date.now() - lastTouchRef.current < 500) return;
       const canvas = canvasRef.current;
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
@@ -340,6 +343,7 @@ const DesignPlan = () => {
   const handleTouchStart = useCallback(
     (e) => {
       if (!isFocused) return; // let onClick handle the focus tap
+      lastTouchRef.current = Date.now();
       const touch = e.touches[0];
       const { x, y } = getCanvasCoords(touch.clientX, touch.clientY);
 
