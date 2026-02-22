@@ -93,6 +93,7 @@ const DeliveryForm = () => {
     if (!formData.driverName.trim()) newErrors.driverName = "Driver name is required";
     if (!formData.clientName.trim()) newErrors.clientName = "Client name is required";
     if (!formData.clientAddress.trim()) newErrors.clientAddress = "Client address is required";
+    if (!formData.despatchNote.trim()) newErrors.despatchNote = "Despatch note # is required";
     if (!formData.date) newErrors.date = "Delivery date is required";
     if (!formData.loadDescription.trim()) newErrors.loadDescription = "Load description is required";
     if (!formData.weight || formData.weight <= 0) newErrors.weight = "Valid weight is required";
@@ -259,6 +260,7 @@ const DeliveryForm = () => {
     field("Driver Name", data.driverName);
     field("Client Name", data.clientName);
     field("Client Address", data.clientAddress);
+    field("Despatch Note #", data.despatchNote);
     field("Delivery Date", new Date(data.date).toLocaleDateString("en-NZ", { day: "2-digit", month: "long", year: "numeric" }));
 
     leftY += 8;
@@ -450,6 +452,22 @@ const DeliveryForm = () => {
               className={errors.clientAddress ? "error" : ""}
             />
             {errors.clientAddress && <span className="error-message">{errors.clientAddress}</span>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="despatchNote">
+              Despatch Note # <span className="required">*</span>
+            </label>
+            <input
+              type="text"
+              id="despatchNote"
+              name="despatchNote"
+              value={formData.despatchNote}
+              onChange={handleChange}
+              placeholder="DN-12345"
+              className={errors.despatchNote ? "error" : ""}
+            />
+            {errors.despatchNote && <span className="error-message">{errors.despatchNote}</span>}
           </div>
 
           <div className="form-group">

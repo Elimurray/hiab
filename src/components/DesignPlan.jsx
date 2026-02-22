@@ -62,14 +62,14 @@ const DesignPlan = () => {
   useEffect(() => {
     if (isFocused) {
       document.body.style.overflow = "hidden";
-      document.body.style.overscrollBehaviorY = "none";
+      document.body.style.overscrollBehavior = "none";
     } else {
-      document.body.style.overflow = "auto";
-      document.body.style.overscrollBehaviorY = "auto";
+      document.body.style.overflow = "";
+      document.body.style.overscrollBehavior = "";
     }
     return () => {
-      document.body.style.overflow = "auto";
-      document.body.style.overscrollBehaviorY = "auto";
+      document.body.style.overflow = "";
+      document.body.style.overscrollBehavior = "";
     };
   }, [isFocused]);
 

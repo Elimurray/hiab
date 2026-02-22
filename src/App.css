@@ -7,6 +7,7 @@
 html,
 body {
   overscroll-behavior: contain; /* prevent bounce/chaining without fully blocking pull-to-refresh */
+  background: rgb(244, 244, 244);
 }
 
 .App {

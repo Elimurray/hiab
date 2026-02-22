@@ -5,6 +5,7 @@ import {
   useMsal,
 } from "@azure/msal-react";
 import Navbar from "./Navbar";
+import Footer from "./Footer";
 import cartersLogo from "../assets/Carters_Horizontal_transparent.png";
 import "./AuthGate.css";
 
@@ -80,6 +81,7 @@ function DomainCheck({ children }) {
     <>
       <Navbar />
       {children}
+      <Footer />
     </>
   );
 }
