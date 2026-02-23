@@ -7,7 +7,13 @@ import "./MapView.css";
 
 const MapView = () => {
   const navigate = useNavigate();
-  const { mapCenter, updateMapCenter, updateMapScreenshot, formData, updateFormData } = useDelivery();
+  const {
+    mapCenter,
+    updateMapCenter,
+    updateMapScreenshot,
+    formData,
+    updateFormData,
+  } = useDelivery();
 
   const [error, setError] = useState(null);
   const mapRef = useRef(null);
@@ -48,10 +54,10 @@ const MapView = () => {
         },
         (err) => {
           setError(
-            err.message || "Unable to retrieve location. Please try again."
+            err.message || "Unable to retrieve location. Please try again.",
           );
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
       );
     } else {
       setError("Geolocation is not supported by this browser.");
@@ -106,7 +112,7 @@ const MapView = () => {
     });
 
     map.controls[window.google.maps.ControlPosition.RIGHT_BOTTOM].push(
-      locationButton
+      locationButton,
     );
   }, []); // empty deps — runs only once when map first mounts
 
@@ -140,7 +146,10 @@ const MapView = () => {
         }
         // Save the searched address into the form context
         if (place.formatted_address) {
-          updateFormData({ ...formData, clientAddress: place.formatted_address });
+          updateFormData({
+            ...formData,
+            clientAddress: place.formatted_address,
+          });
         }
       }
     }
@@ -154,10 +163,10 @@ const MapView = () => {
 
         if (mapElement) {
           const googleControls = mapElement.querySelectorAll(
-            ".gmnoprint, .gm-style-cc, .gm-style button, .gm-fullscreen-control"
+            ".gmnoprint, .gm-style-cc, .gm-style button, .gm-fullscreen-control",
           );
           googleControls.forEach((el) =>
-            el.setAttribute("data-html2canvas-ignore", "true")
+            el.setAttribute("data-html2canvas-ignore", "true"),
           );
 
           const canvas = await html2canvas(mapElement, {
@@ -168,7 +177,7 @@ const MapView = () => {
           });
 
           googleControls.forEach((el) =>
-            el.removeAttribute("data-html2canvas-ignore")
+            el.removeAttribute("data-html2canvas-ignore"),
           );
 
           const screenshot = canvas.toDataURL("image/png");
@@ -189,7 +198,7 @@ const MapView = () => {
   return (
     <div className="map-view-container">
       <div className="map-header">
-        <h1>Hiab Site Planner</h1>
+        <h1>Hiab Lift Planner</h1>
         <p>Step 1: Select your map area for the design plan</p>
       </div>
 

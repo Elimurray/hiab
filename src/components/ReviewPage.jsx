@@ -101,7 +101,7 @@ const ReviewPage = () => {
           designPlan.loadArrow.x,
           designPlan.loadArrow.y,
           30,
-          designPlan.loadArrow.rotation
+          designPlan.loadArrow.rotation,
         );
       }
 
@@ -115,7 +115,7 @@ const ReviewPage = () => {
           designPlan.windArrow.x,
           designPlan.windArrow.y,
           30,
-          designPlan.windArrow.rotation
+          designPlan.windArrow.rotation,
         );
       }
     };
@@ -144,7 +144,7 @@ const ReviewPage = () => {
       // Header
       pdf.setFontSize(22);
       pdf.setFont("helvetica", "bold");
-      pdf.text("HIAB DELIVERY SITE PLAN", pageWidth / 2, yPosition, {
+      pdf.text("HIAB DELIVERY LIFT PLAN", pageWidth / 2, yPosition, {
         align: "center",
       });
 
@@ -249,7 +249,7 @@ const ReviewPage = () => {
 
         pdf.setFontSize(14);
         pdf.setFont("helvetica", "bold");
-        pdf.text("Site Plan", 15, yPosition);
+        pdf.text("Lift Plan", 15, yPosition);
         yPosition += 7;
 
         pdf.addImage(imgData, "PNG", xPosition, yPosition, imgWidth, imgHeight);
@@ -274,7 +274,7 @@ const ReviewPage = () => {
       if (formData.accessNotes) {
         const splitNotes = pdf.splitTextToSize(
           formData.accessNotes,
-          pageWidth - 30
+          pageWidth - 30,
         );
         const notesHeight = splitNotes.length * 5 + 14;
 
@@ -299,7 +299,7 @@ const ReviewPage = () => {
       if (formData.specialInstructions) {
         const splitInstructions = pdf.splitTextToSize(
           formData.specialInstructions,
-          pageWidth - 30
+          pageWidth - 30,
         );
         const instructionsHeight = splitInstructions.length * 5 + 14;
 
@@ -311,7 +311,7 @@ const ReviewPage = () => {
           yPosition,
           pageWidth - margin * 2,
           instructionsHeight,
-          "F"
+          "F",
         );
 
         yPosition += 7;
@@ -335,7 +335,7 @@ const ReviewPage = () => {
           `Generated on ${new Date().toLocaleString()} | Page ${i} of ${totalPages}`,
           pageWidth / 2,
           pageHeight - 10,
-          { align: "center" }
+          { align: "center" },
         );
       }
 
@@ -397,7 +397,7 @@ const ReviewPage = () => {
 
         {/* Design Plan */}
         <div className="review-section map-section">
-          <h2>Site Plan</h2>
+          <h2>Lift Plan</h2>
           <div id="pdf-map" className="review-map">
             <canvas ref={canvasRef} />
           </div>

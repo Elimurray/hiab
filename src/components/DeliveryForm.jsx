@@ -338,7 +338,7 @@ const DeliveryForm = () => {
     ctx.textAlign = "right";
     ctx.fillStyle = "#1F2937";
     ctx.font = "bold 26px Arial";
-    ctx.fillText("HIAB DELIVERY SITE PLAN", W - margin, margin + 22);
+    ctx.fillText("HIAB DELIVERY LIFT PLAN", W - margin, margin + 22);
     ctx.fillStyle = "#6B7280";
     ctx.font = "18px Arial";
     ctx.fillText("Drop-off Location & Details", W - margin, margin + 44);
@@ -473,10 +473,10 @@ const DeliveryForm = () => {
       });
     }
 
-    // ── Right column: site plan image ─────────────────────────────────────────
+    // ── Right column: lift plan image ─────────────────────────────────────────
     ctx.fillStyle = "#6B7280";
     ctx.font = "bold 20px Arial";
-    ctx.fillText("SITE PLAN", rightX, contentTop);
+    ctx.fillText("LIFT PLAN", rightX, contentTop);
     ctx.strokeStyle = "#E5E7EB";
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -598,7 +598,7 @@ const DeliveryForm = () => {
     ctx.font = "20px Arial";
     ctx.textAlign = "center";
     ctx.fillText(
-      `Generated ${new Date().toLocaleString()} | HIAB Site Planner — Carter's`,
+      `Generated ${new Date().toLocaleString()} | HIAB Lift Planner — Carter's`,
       W / 2,
       H - 22,
     );
@@ -642,7 +642,7 @@ const DeliveryForm = () => {
     return (
       <div className="image-preview-overlay">
         <div className="image-preview-card">
-          <h2 className="image-preview-title">Site Plan Ready</h2>
+          <h2 className="image-preview-title">Lift Plan Ready</h2>
 
           {isIOS && (
             <p className="image-preview-hint image-preview-hint--top">
@@ -653,7 +653,7 @@ const DeliveryForm = () => {
           <div className="image-preview-wrapper">
             <img
               src={imageDataUrl}
-              alt="Generated site plan"
+              alt="Generated lift plan"
               className="image-preview-img"
             />
           </div>

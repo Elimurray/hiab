@@ -5,7 +5,9 @@ export default function Footer() {
   return (
     <footer className="footer">
       <img src={cartersLogo} alt="Carter's" className="footer-logo" />
-      <span className="footer-text">HIAB Site Planner &mdash; Carter's &copy; {new Date().getFullYear()}</span>
+      <span className="footer-text">
+        HIAB Lift Planner &mdash; Carter's &copy; {new Date().getFullYear()}
+      </span>
     </footer>
   );
 }

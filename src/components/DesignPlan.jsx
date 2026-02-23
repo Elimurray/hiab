@@ -292,14 +292,7 @@ const DesignPlan = () => {
       }
       redrawCanvas();
     },
-    [
-      isFocused,
-      tool,
-      lineColor,
-      designPlan,
-      updateDesignPlan,
-      redrawCanvas,
-    ],
+    [isFocused, tool, lineColor, designPlan, updateDesignPlan, redrawCanvas],
   );
 
   // Handle mouse move (drawing lines)
@@ -353,21 +346,50 @@ const DesignPlan = () => {
 
       if (tool === "line") {
         setIsDrawing(true);
-        setCurrentLine({ id: Date.now(), points: [{ x, y }], color: lineColor });
+        setCurrentLine({
+          id: Date.now(),
+          points: [{ x, y }],
+          color: lineColor,
+        });
       } else if (tool === "truck") {
-        updateDesignPlan({ truck: { x, y, rotation: designPlan.truck?.rotation || 0, size: designPlan.truck?.size || 100 } });
+        updateDesignPlan({
+          truck: {
+            x,
+            y,
+            rotation: designPlan.truck?.rotation || 0,
+            size: designPlan.truck?.size || 100,
+          },
+        });
       } else if (tool === "cone") {
-        updateDesignPlan({ cones: [...designPlan.cones, { id: Date.now(), x, y }] });
+        updateDesignPlan({
+          cones: [...designPlan.cones, { id: Date.now(), x, y }],
+        });
       } else if (tool === "dropZone") {
-        updateDesignPlan({ dropZones: [...designPlan.dropZones, { id: Date.now(), number: designPlan.dropZones.length + 1, x, y }] });
+        updateDesignPlan({
+          dropZones: [
+            ...designPlan.dropZones,
+            { id: Date.now(), number: designPlan.dropZones.length + 1, x, y },
+          ],
+        });
       } else if (tool === "loadArrow") {
-        updateDesignPlan({ loadArrow: { x, y, rotation: designPlan.loadArrow?.rotation || 0 } });
+        updateDesignPlan({
+          loadArrow: { x, y, rotation: designPlan.loadArrow?.rotation || 0 },
+        });
       } else if (tool === "driver") {
         updateDesignPlan({ driver: { x, y } });
       } else if (tool === "windArrow") {
-        updateDesignPlan({ windArrow: { x, y, rotation: designPlan.windArrow?.rotation || 0 } });
+        updateDesignPlan({
+          windArrow: { x, y, rotation: designPlan.windArrow?.rotation || 0 },
+        });
       } else if (tool === "site") {
-        updateDesignPlan({ site: { x, y, rotation: designPlan.site?.rotation || 0, size: designPlan.site?.size || 200 } });
+        updateDesignPlan({
+          site: {
+            x,
+            y,
+            rotation: designPlan.site?.rotation || 0,
+            size: designPlan.site?.size || 200,
+          },
+        });
       }
       redrawCanvas();
     },
@@ -379,7 +401,10 @@ const DesignPlan = () => {
       if (!isDrawing || tool !== "line") return;
       const touch = e.touches[0];
       const { x, y } = getCanvasCoords(touch.clientX, touch.clientY);
-      setCurrentLine((prev) => ({ ...prev, points: [...prev.points, { x, y }] }));
+      setCurrentLine((prev) => ({
+        ...prev,
+        points: [...prev.points, { x, y }],
+      }));
       redrawCanvas();
     },
     [isDrawing, tool, redrawCanvas],
@@ -462,7 +487,7 @@ const DesignPlan = () => {
         newWin.document.write(`
         <!DOCTYPE html>
         <html>
-          <head><title>Hiab Site Plan</title></head>
+          <head><title>Hiab Lift Plan</title></head>
           <body style="margin:0;background:#111;display:flex;justify-content:center;align-items:center;height:100vh;">
             <img src="${dataUrl}" style="max-width:100%;height:auto;" />
           </body>
@@ -492,8 +517,8 @@ const DesignPlan = () => {
         navigator
           .share({
             files: [file],
-            title: "Hiab Site Plan",
-            text: "Site plan design",
+            title: "Hiab Lift Plan",
+            text: "Lift plan design",
           })
           .catch(() => triggerDownload(dataUrl, fileName));
       }, "image/png");
@@ -518,8 +543,8 @@ const DesignPlan = () => {
       {!isFocused && (
         <>
           <div className="design-header">
-            <h1>Hiab Site Planner - Design Plan</h1>
-            <p>Step 2: Add annotations to the site plan</p>
+            <h1>Hiab Lift Planner - Design Plan</h1>
+            <p>Step 2: Add annotations to the lift plan</p>
           </div>
 
           <div className="instructions">
@@ -575,9 +600,25 @@ const DesignPlan = () => {
                 onClick={() => setTool("line")}
                 title="Draw Line"
               >
-                <svg className="btn-icon-img" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M4 20L20 4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
-                  <path d="M14 4h6v6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <svg
+                  className="btn-icon-img"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M4 20L20 4"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M14 4h6v6"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
                 <span className="btn-text">Draw Line</span>
               </button>
@@ -586,9 +627,17 @@ const DesignPlan = () => {
                 onClick={() => setTool("dropZone")}
                 title="Drop Zone"
               >
-                <svg className="btn-icon-img" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#EF4444"/>
-                  <circle cx="12" cy="9" r="2.5" fill="white"/>
+                <svg
+                  className="btn-icon-img"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
+                    fill="#EF4444"
+                  />
+                  <circle cx="12" cy="9" r="2.5" fill="white" />
                 </svg>
                 <span className="btn-text">Drop Zone</span>
               </button>
@@ -597,7 +646,11 @@ const DesignPlan = () => {
                 onClick={() => setTool("loadArrow")}
                 title="Load Arrow"
               >
-                <img src={loadArrowIcon} className="btn-icon-img" alt="Load Arrow" />
+                <img
+                  src={loadArrowIcon}
+                  className="btn-icon-img"
+                  alt="Load Arrow"
+                />
                 <span className="btn-text">Load Arrow</span>
               </button>
               <button
@@ -605,7 +658,11 @@ const DesignPlan = () => {
                 onClick={() => setTool("windArrow")}
                 title="Wind Arrow"
               >
-                <img src={windArrowIcon} className="btn-icon-img" alt="Wind Arrow" />
+                <img
+                  src={windArrowIcon}
+                  className="btn-icon-img"
+                  alt="Wind Arrow"
+                />
                 <span className="btn-text">Wind Arrow</span>
               </button>
             </div>
