@@ -48,6 +48,7 @@ export const DeliveryProvider = ({ children }) => {
     weight: "",
     accessNotes: "",
     specialInstructions: "",
+    hazards: {},
   });
 
   // Update map screenshot
@@ -106,6 +107,7 @@ export const DeliveryProvider = ({ children }) => {
       weight: "",
       accessNotes: "",
       specialInstructions: "",
+      hazards: {},
     });
     setDesignPlanHistory([]);
   };

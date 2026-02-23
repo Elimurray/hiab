@@ -11,6 +11,45 @@ import windArrowIcon from "../utils/wind.png";
 import siteIcon from "../utils/site.svg";
 import "./DeliveryForm.css";
 
+const HAZARDS = [
+  { id: "incline", label: "Truck parked on incline/decline > 5°" },
+  { id: "stabSpace", label: "Restricted space for stabiliser legs" },
+  { id: "stabGround", label: "Ground unsuitable for stabiliser legs" },
+  { id: "weather", label: "Unsuitable weather conditions" },
+  {
+    id: "overheadLines",
+    label: "Overhead lines within 4m",
+    note: "Controls must include verification of Close Approach Consent",
+  },
+  {
+    id: "liftingOver",
+    label: "Lifting over buildings / vehicles",
+    note: "Controls must include a check of the building and/or vehicle for occupancy prior to the lift",
+  },
+  {
+    id: "truckDeck",
+    label: "Accessing the truck deck / scaffold / product",
+    note: "Controls must include not working from the truck deck when operating the crane",
+  },
+  { id: "awkwardLoad", label: "Awkward to secure product" },
+  { id: "overweight", label: "Loads overweight for crane limit" },
+  {
+    id: "roadBerm",
+    label: "Truck parked on road / berm",
+    note: "Controls must include consideration for traffic management",
+  },
+  {
+    id: "footpath",
+    label: "Truck parked on footpath or lifting over footpath",
+    note: "Controls must include cones & signage to temporarily close the footpath, warn people of the lift in progress, and restrict access during the lift",
+  },
+  {
+    id: "publicArea",
+    label: "Potential for general public or other workers to enter the area",
+    note: "Controls must include using a spotter or cones and barrier tape to exclude people from the lift area",
+  },
+];
+
 const ICON_SRCS = {
   truck: truckIcon,
   cone: coneIcon,
@@ -94,12 +133,36 @@ const DeliveryForm = () => {
       const current = prev.liftPersonnel || [];
       let newPersonnel;
       if (num > current.length) {
-        newPersonnel = [...current, ...Array(num - current.length).fill(null).map(() => ({ name: "", role: "" }))];
+        newPersonnel = [
+          ...current,
+          ...Array(num - current.length)
+            .fill(null)
+            .map(() => ({ name: "", role: "" })),
+        ];
       } else {
         newPersonnel = current.slice(0, num);
       }
-      return { ...prev, numberOfPeople: e.target.value, liftPersonnel: newPersonnel };
+      return {
+        ...prev,
+        numberOfPeople: e.target.value,
+        liftPersonnel: newPersonnel,
+      };
     });
+  };
+
+  const handleHazardChange = (id, field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      hazards: {
+        ...prev.hazards,
+        [id]: {
+          checked: null,
+          controls: "",
+          ...(prev.hazards[id] || {}),
+          [field]: value,
+        },
+      },
+    }));
   };
 
   const handlePersonnelChange = (index, field, value) => {
@@ -112,13 +175,19 @@ const DeliveryForm = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.driverName.trim()) newErrors.driverName = "Driver name is required";
-    if (!formData.clientName.trim()) newErrors.clientName = "Client name is required";
-    if (!formData.clientAddress.trim()) newErrors.clientAddress = "Client address is required";
-    if (!formData.despatchNote.trim()) newErrors.despatchNote = "Despatch note # is required";
+    if (!formData.driverName.trim())
+      newErrors.driverName = "Driver name is required";
+    if (!formData.clientName.trim())
+      newErrors.clientName = "Client name is required";
+    if (!formData.clientAddress.trim())
+      newErrors.clientAddress = "Client address is required";
+    if (!formData.despatchNote.trim())
+      newErrors.despatchNote = "Despatch note # is required";
     if (!formData.date) newErrors.date = "Delivery date is required";
-    if (!formData.loadDescription.trim()) newErrors.loadDescription = "Load description is required";
-    if (!formData.weight || formData.weight <= 0) newErrors.weight = "Valid weight is required";
+    if (!formData.loadDescription.trim())
+      newErrors.loadDescription = "Load description is required";
+    if (!formData.weight || formData.weight <= 0)
+      newErrors.weight = "Valid weight is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -135,9 +204,14 @@ const DeliveryForm = () => {
     ctx.drawImage(mapImg, 0, 0);
 
     const iconEntries = await Promise.all(
-      Object.entries(ICON_SRCS).map(async ([key, src]) => [key, await loadImage(src)])
+      Object.entries(ICON_SRCS).map(async ([key, src]) => [
+        key,
+        await loadImage(src),
+      ]),
     );
-    const icons = Object.fromEntries(iconEntries.filter(([, img]) => img !== null));
+    const icons = Object.fromEntries(
+      iconEntries.filter(([, img]) => img !== null),
+    );
 
     const drawIcon = (key, x, y, size, rotation = 0) => {
       const img = icons[key];
@@ -161,10 +235,22 @@ const DeliveryForm = () => {
     });
 
     if (designPlan.site) {
-      drawIcon("site", designPlan.site.x, designPlan.site.y, designPlan.site.size || 200, designPlan.site.rotation || 0);
+      drawIcon(
+        "site",
+        designPlan.site.x,
+        designPlan.site.y,
+        designPlan.site.size || 200,
+        designPlan.site.rotation || 0,
+      );
     }
     if (designPlan.truck) {
-      drawIcon("truck", designPlan.truck.x, designPlan.truck.y, designPlan.truck.size || 100, designPlan.truck.rotation || 0);
+      drawIcon(
+        "truck",
+        designPlan.truck.x,
+        designPlan.truck.y,
+        designPlan.truck.size || 100,
+        designPlan.truck.rotation || 0,
+      );
     }
 
     designPlan.cones.forEach((cone) => {
@@ -187,13 +273,25 @@ const DeliveryForm = () => {
     });
 
     if (designPlan.loadArrow) {
-      drawIcon("loadArrow", designPlan.loadArrow.x, designPlan.loadArrow.y, 100, designPlan.loadArrow.rotation);
+      drawIcon(
+        "loadArrow",
+        designPlan.loadArrow.x,
+        designPlan.loadArrow.y,
+        100,
+        designPlan.loadArrow.rotation,
+      );
     }
     if (designPlan.driver) {
       drawIcon("driver", designPlan.driver.x, designPlan.driver.y, 60, 0);
     }
     if (designPlan.windArrow) {
-      drawIcon("windArrow", designPlan.windArrow.x, designPlan.windArrow.y, 200, designPlan.windArrow.rotation);
+      drawIcon(
+        "windArrow",
+        designPlan.windArrow.x,
+        designPlan.windArrow.y,
+        200,
+        designPlan.windArrow.rotation,
+      );
     }
 
     return canvas;
@@ -202,11 +300,20 @@ const DeliveryForm = () => {
   const generateImage = async (data) => {
     const mapCanvas = await buildAnnotatedCanvas();
 
-    // Canvas dimensions (×2 for retina sharpness)
+    // Canvas dimensions — landscape (×2 for retina sharpness)
     const SCALE = 2;
-    const W = 1200;
+    const W = 1600;
     const personnelCount = (data.liftPersonnel || []).length;
-    const H = 1700 + Math.max(0, personnelCount - 3) * 35;
+    const checkedHazards = HAZARDS.filter(
+      (h) => data.hazards?.[h.id]?.checked === true,
+    );
+    const H =
+      1050 +
+      Math.max(0, personnelCount - 3) * 35 +
+      checkedHazards.reduce(
+        (acc, h) => acc + 40 + (data.hazards[h.id].controls ? 60 : 0),
+        0,
+      );
 
     const canvas = document.createElement("canvas");
     canvas.width = W * SCALE;
@@ -247,8 +354,8 @@ const DeliveryForm = () => {
 
     // ── Two-column layout ──────────────────────────────────────────────────────
     const contentTop = headerBottom + 24;
-    const leftW = 300;
-    const gap = 28;
+    const leftW = 420;
+    const gap = 32;
     const rightX = margin + leftW + gap;
     const rightW = W - rightX - margin;
 
@@ -287,11 +394,22 @@ const DeliveryForm = () => {
     if (data.numberOfPeople) field("# of People", data.numberOfPeople);
     if (data.liftPersonnel && data.liftPersonnel.length > 0) {
       data.liftPersonnel.forEach((person, i) => {
-        field(`Person ${i + 1}`, `${person.name || "—"}  –  ${person.role || "—"}`);
+        field(
+          `Person ${i + 1}`,
+          `${person.name || "—"}  –  ${person.role || "—"}`,
+        );
       });
     }
-    if (data.knownLiftWeights) field("Known Lift Weights", data.knownLiftWeights);
-    field("Delivery Date", new Date(data.date).toLocaleDateString("en-NZ", { day: "2-digit", month: "long", year: "numeric" }));
+    if (data.knownLiftWeights)
+      field("Known Lift Weights", data.knownLiftWeights);
+    field(
+      "Delivery Date",
+      new Date(data.date).toLocaleDateString("en-NZ", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      }),
+    );
 
     leftY += 8;
     sectionTitle("Load Details");
@@ -302,7 +420,7 @@ const DeliveryForm = () => {
     sectionTitle("Annotations");
     field("Drop Zones", `${designPlan.dropZones.length}`);
     field("Cones", `${designPlan.cones.length}`);
-    field("Lines", `${designPlan.lines.length}`);
+    // field("Lines", `${designPlan.lines.length}`);
 
     if (data.accessNotes) {
       leftY += 8;
@@ -320,6 +438,39 @@ const DeliveryForm = () => {
       leftY = wrapText(ctx, data.specialInstructions, margin, leftY, leftW, 19);
     }
 
+    if (checkedHazards.length > 0) {
+      leftY += 8;
+      sectionTitle("High-Risk Hazards");
+      checkedHazards.forEach((hazard) => {
+        // Red label
+        ctx.fillStyle = "#b91c1c";
+        ctx.font = "bold 11px Arial";
+        leftY = wrapText(
+          ctx,
+          "\u26A0 " + hazard.label,
+          margin,
+          leftY,
+          leftW,
+          17,
+        );
+        leftY += 2;
+        const controls = data.hazards[hazard.id].controls;
+        if (controls) {
+          ctx.fillStyle = "#374151";
+          ctx.font = "11px Arial";
+          leftY = wrapText(
+            ctx,
+            "Controls: " + controls,
+            margin,
+            leftY,
+            leftW,
+            17,
+          );
+        }
+        leftY += 10;
+      });
+    }
+
     // ── Right column: site plan image ─────────────────────────────────────────
     ctx.fillStyle = "#6B7280";
     ctx.font = "bold 11px Arial";
@@ -333,9 +484,11 @@ const DeliveryForm = () => {
 
     const imgTop = contentTop + 18;
     const imgAreaH = H - imgTop - 60;
+    const mapMaxW = Math.min(rightW, 900);
+    const mapMaxH = Math.min(imgAreaH, 900);
     let iw = mapCanvas.width;
     let ih = mapCanvas.height;
-    const imgScale = Math.min(rightW / iw, imgAreaH / ih);
+    const imgScale = Math.min(mapMaxW / iw, mapMaxH / ih);
     iw *= imgScale;
     ih *= imgScale;
     const imgX = rightX + (rightW - iw) / 2;
@@ -353,7 +506,7 @@ const DeliveryForm = () => {
     ctx.fillText(
       `Generated ${new Date().toLocaleString()} | HIAB Site Planner — Carter's`,
       W / 2,
-      H - 22
+      H - 22,
     );
     ctx.textAlign = "left";
 
@@ -390,7 +543,8 @@ const DeliveryForm = () => {
 
   // ── Image preview overlay ──────────────────────────────────────────────────
   if (imageDataUrl) {
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isIOS =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     return (
       <div className="image-preview-overlay">
         <div className="image-preview-card">
@@ -403,7 +557,11 @@ const DeliveryForm = () => {
           )}
 
           <div className="image-preview-wrapper">
-            <img src={imageDataUrl} alt="Generated site plan" className="image-preview-img" />
+            <img
+              src={imageDataUrl}
+              alt="Generated site plan"
+              className="image-preview-img"
+            />
           </div>
 
           {!isIOS && (
@@ -448,7 +606,9 @@ const DeliveryForm = () => {
                 placeholder="John Smith"
                 className={errors.driverName ? "error" : ""}
               />
-              {errors.driverName && <span className="error-message">{errors.driverName}</span>}
+              {errors.driverName && (
+                <span className="error-message">{errors.driverName}</span>
+              )}
             </div>
 
             <div className="form-group">
@@ -464,7 +624,9 @@ const DeliveryForm = () => {
                 placeholder="ABC Construction Ltd"
                 className={errors.clientName ? "error" : ""}
               />
-              {errors.clientName && <span className="error-message">{errors.clientName}</span>}
+              {errors.clientName && (
+                <span className="error-message">{errors.clientName}</span>
+              )}
             </div>
           </div>
 
@@ -481,7 +643,9 @@ const DeliveryForm = () => {
               placeholder="123 Main Street, Hamilton"
               className={errors.clientAddress ? "error" : ""}
             />
-            {errors.clientAddress && <span className="error-message">{errors.clientAddress}</span>}
+            {errors.clientAddress && (
+              <span className="error-message">{errors.clientAddress}</span>
+            )}
           </div>
 
           <div className="form-group">
@@ -497,12 +661,15 @@ const DeliveryForm = () => {
               placeholder="DN-12345"
               className={errors.despatchNote ? "error" : ""}
             />
-            {errors.despatchNote && <span className="error-message">{errors.despatchNote}</span>}
+            {errors.despatchNote && (
+              <span className="error-message">{errors.despatchNote}</span>
+            )}
           </div>
 
           <div className="form-group">
             <label htmlFor="numberOfPeople">
-              # of People Involved in Delivery <span className="optional">(Optional)</span>
+              # of People Involved in Delivery{" "}
+              <span className="optional">(Optional)</span>
             </label>
             <input
               type="number"
@@ -524,13 +691,17 @@ const DeliveryForm = () => {
                   <input
                     type="text"
                     value={person.name}
-                    onChange={(e) => handlePersonnelChange(idx, "name", e.target.value)}
+                    onChange={(e) =>
+                      handlePersonnelChange(idx, "name", e.target.value)
+                    }
                     placeholder="Name"
                   />
                   <input
                     type="text"
                     value={person.role}
-                    onChange={(e) => handlePersonnelChange(idx, "role", e.target.value)}
+                    onChange={(e) =>
+                      handlePersonnelChange(idx, "role", e.target.value)
+                    }
                     placeholder="Role (e.g. Crane Operator, Spotter)"
                   />
                 </div>
@@ -564,7 +735,9 @@ const DeliveryForm = () => {
               onChange={handleChange}
               className={errors.date ? "error" : ""}
             />
-            {errors.date && <span className="error-message">{errors.date}</span>}
+            {errors.date && (
+              <span className="error-message">{errors.date}</span>
+            )}
           </div>
         </div>
 
@@ -584,7 +757,9 @@ const DeliveryForm = () => {
               placeholder="Steel beams, 6m length"
               className={errors.loadDescription ? "error" : ""}
             />
-            {errors.loadDescription && <span className="error-message">{errors.loadDescription}</span>}
+            {errors.loadDescription && (
+              <span className="error-message">{errors.loadDescription}</span>
+            )}
           </div>
 
           <div className="form-group">
@@ -602,7 +777,9 @@ const DeliveryForm = () => {
               step="0.01"
               className={errors.weight ? "error" : ""}
             />
-            {errors.weight && <span className="error-message">{errors.weight}</span>}
+            {errors.weight && (
+              <span className="error-message">{errors.weight}</span>
+            )}
           </div>
         </div>
 
@@ -621,7 +798,9 @@ const DeliveryForm = () => {
               placeholder="Gate code: 1234, Narrow entrance, Low overhead wires..."
               rows="3"
             />
-            <span className="help-text">Include gate codes, restrictions, hazards, etc.</span>
+            <span className="help-text">
+              Include gate codes, restrictions, hazards, etc.
+            </span>
           </div>
 
           <div className="form-group">
@@ -636,15 +815,103 @@ const DeliveryForm = () => {
               placeholder="Contact site manager on arrival, Drop on north side only..."
               rows="3"
             />
-            <span className="help-text">Any specific requirements or contacts</span>
+            <span className="help-text">
+              Any specific requirements or contacts
+            </span>
+          </div>
+        </div>
+
+        <div className="form-section">
+          <h2>High-Risk Hazards</h2>
+          <p className="hazard-intro">
+            Indicate all that apply. Refer to the Unloading Product on Site SOP
+            for appropriate control measures, and enter control measures for
+            every hazard marked&nbsp;Y.
+          </p>
+
+          <div className="hazard-col-headers">
+            <span className="hazard-col-label">Hazard</span>
+            <span className="hazard-col-yn">Y / N</span>
+          </div>
+
+          <div className="hazard-list">
+            {HAZARDS.map((hazard) => {
+              const state = formData.hazards?.[hazard.id] || {
+                checked: null,
+                controls: "",
+              };
+              return (
+                <div key={hazard.id} className="hazard-item">
+                  <div className="hazard-row">
+                    <div className="hazard-label">
+                      <span>{hazard.label}</span>
+                      {hazard.note && (
+                        <span className="hazard-note">{hazard.note}</span>
+                      )}
+                    </div>
+                    <div className="hazard-toggle">
+                      <button
+                        type="button"
+                        className={`hazard-btn${state.checked === true ? " hazard-yes" : ""}`}
+                        onClick={() =>
+                          handleHazardChange(
+                            hazard.id,
+                            "checked",
+                            state.checked === true ? null : true,
+                          )
+                        }
+                      >
+                        Y
+                      </button>
+                      <button
+                        type="button"
+                        className={`hazard-btn${state.checked === false ? " hazard-no" : ""}`}
+                        onClick={() =>
+                          handleHazardChange(
+                            hazard.id,
+                            "checked",
+                            state.checked === false ? null : false,
+                          )
+                        }
+                      >
+                        N
+                      </button>
+                    </div>
+                  </div>
+                  {state.checked === true && (
+                    <textarea
+                      className="hazard-controls"
+                      placeholder="Enter control measures..."
+                      value={state.controls}
+                      onChange={(e) =>
+                        handleHazardChange(
+                          hazard.id,
+                          "controls",
+                          e.target.value,
+                        )
+                      }
+                      rows={3}
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 
         <div className="form-actions">
-          <button type="button" className="btn btn-secondary" onClick={handleBack}>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={handleBack}
+          >
             ← Back to Design Plan
           </button>
-          <button type="submit" className="btn btn-primary" disabled={generating}>
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={generating}
+          >
             {generating ? "Generating..." : "Generate Image"}
           </button>
         </div>
