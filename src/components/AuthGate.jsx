@@ -72,7 +72,7 @@ function DomainCheck({ children }) {
             Sign in with a different account
           </button>
         </div>
-        <p className="auth-footer">HIAB Site Planner &mdash; Carter's</p>
+        <p className="auth-footer">HIAB Lift Planner &mdash; Carter's</p>
       </div>
     );
   }
@@ -99,7 +99,7 @@ export default function AuthGate({ children }) {
           <div className="auth-card">
             <img src={cartersLogo} alt="Carter's" className="auth-logo" />
             <div className="auth-divider" />
-            <h1>Auckland Distribution Center Hiab Site Planner</h1>
+            <h1>Auckland Distribution Center Hiab Lift Planner</h1>
             <p>Sign in with your Carter's Microsoft account to continue.</p>
             <button
               className="btn-microsoft"
@@ -111,7 +111,7 @@ export default function AuthGate({ children }) {
               Sign in with Microsoft
             </button>
           </div>
-          <p className="auth-footer">HIAB Site Planner &mdash; Carter's</p>
+          <p className="auth-footer">HIAB Lift Planner &mdash; Carter's</p>
         </div>
       </UnauthenticatedTemplate>
     </>
