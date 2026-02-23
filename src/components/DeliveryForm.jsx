@@ -307,13 +307,20 @@ const DeliveryForm = () => {
     const checkedHazards = HAZARDS.filter(
       (h) => data.hazards?.[h.id]?.checked === true,
     );
-    const H =
-      1080 +
-      Math.max(0, personnelCount - 3) * 50 +
-      checkedHazards.reduce(
-        (acc, h) => acc + 55 + (data.hazards[h.id].controls ? 75 : 0),
-        0,
-      );
+    // H is driven by the left column content height (ends at Annotations)
+    const FIELD_H = 62; // label(22) + value line(22) + gap(18)
+    const SEC_H = 24;   // section title overhead (8 divider + 16 gap)
+    const leftColH =
+      SEC_H + // Delivery Information
+      4 * FIELD_H + // driver, client, address, despatch (required)
+      (data.numberOfPeople ? FIELD_H : 0) +
+      (data.liftPersonnel?.length || 0) * FIELD_H +
+      (data.knownLiftWeights ? FIELD_H : 0) +
+      FIELD_H + // date
+      8 + SEC_H + 2 * FIELD_H + // gap + Load Details + description + weight
+      8 + SEC_H + 2 * FIELD_H;  // gap + Annotations + drop zones + cones
+    // contentTop = margin(40) + headerH(60) + gap(24) = 124
+    const H = 124 + leftColH + 60;
 
     const canvas = document.createElement("canvas");
     canvas.width = W * SCALE;
@@ -352,14 +359,17 @@ const DeliveryForm = () => {
     ctx.lineTo(W - margin, headerBottom);
     ctx.stroke();
 
-    // ── Two-column layout ──────────────────────────────────────────────────────
+    // ── Three-column layout ────────────────────────────────────────────────────
     const contentTop = headerBottom + 24;
-    const leftW = 860;
-    const gap = 40;
-    const rightX = margin + leftW + gap;
-    const rightW = W - rightX - margin; // ~980px — balanced 50/50
+    const colGap = 30;
+    const leftW = 420;
+    const midX = margin + leftW + colGap; // 490
+    const midW = 440;
+    const rightX = midX + midW + colGap; // 960
+    const rightW = W - rightX - margin; // 920
 
     let leftY = contentTop;
+    let midY = contentTop;
 
     const sectionTitle = (title) => {
       ctx.fillStyle = "#6B7280";
@@ -384,6 +394,20 @@ const DeliveryForm = () => {
       ctx.font = "18px Arial";
       leftY = wrapText(ctx, value, margin, leftY, leftW, 22);
       leftY += 18;
+    };
+
+    const midSectionTitle = (title) => {
+      ctx.fillStyle = "#6B7280";
+      ctx.font = "bold 20px Arial";
+      ctx.fillText(title.toUpperCase(), midX, midY);
+      midY += 8;
+      ctx.strokeStyle = "#E5E7EB";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(midX, midY);
+      ctx.lineTo(midX + midW, midY);
+      ctx.stroke();
+      midY += 16;
     };
 
     sectionTitle("Delivery Information");
@@ -422,54 +446,39 @@ const DeliveryForm = () => {
     field("Cones", `${designPlan.cones.length}`);
     // field("Lines", `${designPlan.lines.length}`);
 
+    // ── Middle column: notes & hazards ────────────────────────────────────────
     if (data.accessNotes) {
-      leftY += 8;
-      sectionTitle("Access Notes");
+      midSectionTitle("Access Notes");
       ctx.fillStyle = "#1F2937";
       ctx.font = "18px Arial";
-      leftY = wrapText(ctx, data.accessNotes, margin, leftY, leftW, 22);
-      leftY += 18;
+      midY = wrapText(ctx, data.accessNotes, midX, midY, midW, 22);
+      midY += 18;
     }
 
     if (data.specialInstructions) {
-      leftY += 8;
-      sectionTitle("Special Instructions");
+      if (data.accessNotes) midY += 8;
+      midSectionTitle("Special Instructions");
       ctx.fillStyle = "#1F2937";
       ctx.font = "18px Arial";
-      leftY = wrapText(ctx, data.specialInstructions, margin, leftY, leftW, 22);
-      leftY += 18;
+      midY = wrapText(ctx, data.specialInstructions, midX, midY, midW, 22);
+      midY += 18;
     }
 
     if (checkedHazards.length > 0) {
-      leftY += 8;
-      sectionTitle("High-Risk Hazards");
+      midY += 8;
+      midSectionTitle("High-Risk Hazards");
       checkedHazards.forEach((hazard) => {
-        // Red label
         ctx.fillStyle = "#b91c1c";
         ctx.font = "bold 18px Arial";
-        leftY = wrapText(
-          ctx,
-          "\u26A0 " + hazard.label,
-          margin,
-          leftY,
-          leftW,
-          17,
-        );
-        leftY += 2;
+        midY = wrapText(ctx, "\u26A0 " + hazard.label, midX, midY, midW, 22);
+        midY += 2;
         const controls = data.hazards[hazard.id].controls;
         if (controls) {
           ctx.fillStyle = "#374151";
           ctx.font = "16px Arial";
-          leftY = wrapText(
-            ctx,
-            "Controls: " + controls,
-            margin,
-            leftY,
-            leftW,
-            17,
-          );
+          midY = wrapText(ctx, "Controls: " + controls, midX, midY, midW, 20);
         }
-        leftY += 10;
+        midY += 10;
       });
     }
 
@@ -577,16 +586,15 @@ const DeliveryForm = () => {
     ctx.stroke();
 
     const imgTop = keyBottomY + 12;
-    const imgAreaH = H - imgTop - 60;
-    const mapMaxW = Math.min(rightW, 1060);
-    const mapMaxH = Math.min(imgAreaH, 1060);
+    const mapMaxW = Math.min(rightW, 680);
+    const mapMaxH = 640;
     let iw = mapCanvas.width;
     let ih = mapCanvas.height;
     const imgScale = Math.min(mapMaxW / iw, mapMaxH / ih);
     iw *= imgScale;
     ih *= imgScale;
     const imgX = rightX + (rightW - iw) / 2;
-    const imgY = imgTop + (imgAreaH - ih) / 2;
+    const imgY = imgTop;
     ctx.drawImage(mapCanvas, imgX, imgY, iw, ih);
 
     ctx.strokeStyle = "#D1D5DB";
