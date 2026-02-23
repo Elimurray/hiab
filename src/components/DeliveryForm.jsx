@@ -266,7 +266,7 @@ const DeliveryForm = () => {
       ctx.arc(zone.x, zone.y, 15, 0, 2 * Math.PI);
       ctx.fill();
       ctx.fillStyle = "#FFFFFF";
-      ctx.font = "14px Arial";
+      ctx.font = "18px Arial";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(zone.number.toString(), zone.x, zone.y);
@@ -302,16 +302,16 @@ const DeliveryForm = () => {
 
     // Canvas dimensions — landscape (×2 for retina sharpness)
     const SCALE = 2;
-    const W = 1600;
+    const W = 1920;
     const personnelCount = (data.liftPersonnel || []).length;
     const checkedHazards = HAZARDS.filter(
       (h) => data.hazards?.[h.id]?.checked === true,
     );
     const H =
-      1050 +
-      Math.max(0, personnelCount - 3) * 35 +
+      1080 +
+      Math.max(0, personnelCount - 3) * 50 +
       checkedHazards.reduce(
-        (acc, h) => acc + 40 + (data.hazards[h.id].controls ? 60 : 0),
+        (acc, h) => acc + 55 + (data.hazards[h.id].controls ? 75 : 0),
         0,
       );
 
@@ -340,7 +340,7 @@ const DeliveryForm = () => {
     ctx.font = "bold 26px Arial";
     ctx.fillText("HIAB DELIVERY SITE PLAN", W - margin, margin + 22);
     ctx.fillStyle = "#6B7280";
-    ctx.font = "15px Arial";
+    ctx.font = "18px Arial";
     ctx.fillText("Drop-off Location & Details", W - margin, margin + 44);
     ctx.textAlign = "left";
 
@@ -354,16 +354,16 @@ const DeliveryForm = () => {
 
     // ── Two-column layout ──────────────────────────────────────────────────────
     const contentTop = headerBottom + 24;
-    const leftW = 420;
-    const gap = 32;
+    const leftW = 860;
+    const gap = 40;
     const rightX = margin + leftW + gap;
-    const rightW = W - rightX - margin;
+    const rightW = W - rightX - margin; // ~980px — balanced 50/50
 
     let leftY = contentTop;
 
     const sectionTitle = (title) => {
       ctx.fillStyle = "#6B7280";
-      ctx.font = "bold 11px Arial";
+      ctx.font = "bold 20px Arial";
       ctx.fillText(title.toUpperCase(), margin, leftY);
       leftY += 8;
       ctx.strokeStyle = "#E5E7EB";
@@ -376,14 +376,14 @@ const DeliveryForm = () => {
     };
 
     const field = (label, value) => {
-      ctx.fillStyle = "#6B7280";
-      ctx.font = "bold 10px Arial";
-      ctx.fillText(label, margin, leftY);
-      leftY += 16;
+      ctx.fillStyle = "#9CA3AF";
+      ctx.font = "bold 13px Arial";
+      ctx.fillText(label.toUpperCase(), margin, leftY);
+      leftY += 22;
       ctx.fillStyle = "#1F2937";
-      ctx.font = "14px Arial";
-      leftY = wrapText(ctx, value, margin, leftY, leftW, 20);
-      leftY += 10;
+      ctx.font = "18px Arial";
+      leftY = wrapText(ctx, value, margin, leftY, leftW, 22);
+      leftY += 18;
     };
 
     sectionTitle("Delivery Information");
@@ -426,16 +426,18 @@ const DeliveryForm = () => {
       leftY += 8;
       sectionTitle("Access Notes");
       ctx.fillStyle = "#1F2937";
-      ctx.font = "13px Arial";
-      leftY = wrapText(ctx, data.accessNotes, margin, leftY, leftW, 19);
+      ctx.font = "18px Arial";
+      leftY = wrapText(ctx, data.accessNotes, margin, leftY, leftW, 22);
+      leftY += 18;
     }
 
     if (data.specialInstructions) {
       leftY += 8;
       sectionTitle("Special Instructions");
       ctx.fillStyle = "#1F2937";
-      ctx.font = "13px Arial";
-      leftY = wrapText(ctx, data.specialInstructions, margin, leftY, leftW, 19);
+      ctx.font = "18px Arial";
+      leftY = wrapText(ctx, data.specialInstructions, margin, leftY, leftW, 22);
+      leftY += 18;
     }
 
     if (checkedHazards.length > 0) {
@@ -444,7 +446,7 @@ const DeliveryForm = () => {
       checkedHazards.forEach((hazard) => {
         // Red label
         ctx.fillStyle = "#b91c1c";
-        ctx.font = "bold 11px Arial";
+        ctx.font = "bold 18px Arial";
         leftY = wrapText(
           ctx,
           "\u26A0 " + hazard.label,
@@ -457,7 +459,7 @@ const DeliveryForm = () => {
         const controls = data.hazards[hazard.id].controls;
         if (controls) {
           ctx.fillStyle = "#374151";
-          ctx.font = "11px Arial";
+          ctx.font = "16px Arial";
           leftY = wrapText(
             ctx,
             "Controls: " + controls,
@@ -473,19 +475,111 @@ const DeliveryForm = () => {
 
     // ── Right column: site plan image ─────────────────────────────────────────
     ctx.fillStyle = "#6B7280";
-    ctx.font = "bold 11px Arial";
-    ctx.fillText("SITE PLAN", rightX, contentTop - 4);
+    ctx.font = "bold 20px Arial";
+    ctx.fillText("SITE PLAN", rightX, contentTop);
     ctx.strokeStyle = "#E5E7EB";
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(rightX, contentTop + 4);
-    ctx.lineTo(rightX + rightW, contentTop + 4);
+    ctx.moveTo(rightX, contentTop + 8);
+    ctx.lineTo(rightX + rightW, contentTop + 8);
     ctx.stroke();
 
-    const imgTop = contentTop + 18;
+    // ── Key / Legend ────────────────────────────────────────────────────────
+    const keyIcons = Object.fromEntries(
+      await Promise.all(
+        Object.entries(ICON_SRCS).map(async ([k, src]) => [
+          k,
+          await loadImage(src),
+        ]),
+      ),
+    );
+
+    const keyTopY = contentTop + 24;
+    ctx.fillStyle = "#9CA3AF";
+    ctx.font = "bold 11px Arial";
+    ctx.fillText("KEY", rightX, keyTopY);
+
+    const keyRowY = keyTopY + 16;
+    const kIconSize = 26;
+    const kCols = 3;
+    const kColW = Math.floor(rightW / kCols);
+    const kRowH = 38;
+
+    const keyItems = [
+      { draw: "icon", key: "truck", label: "Truck" },
+      { draw: "icon", key: "driver", label: "Driver / Spotter" },
+      { draw: "dropZone", label: "Drop Zone" },
+      { draw: "cone", label: "Cone" },
+      { draw: "icon", key: "loadArrow", label: "Load Direction" },
+      { draw: "icon", key: "windArrow", label: "Wind Direction", darkBg: true },
+      { draw: "line", label: "Lines" },
+      ...(designPlan.site
+        ? [{ draw: "icon", key: "site", label: "Site" }]
+        : []),
+    ];
+
+    keyItems.forEach((item, idx) => {
+      const col = idx % kCols;
+      const row = Math.floor(idx / kCols);
+      const kx = rightX + col * kColW;
+      const ky = keyRowY + row * kRowH;
+      const cy = ky + kIconSize / 2;
+
+      if (item.draw === "icon") {
+        if (item.darkBg) {
+          ctx.fillStyle = "#374151";
+          ctx.beginPath();
+          ctx.arc(kx + kIconSize / 2, cy, kIconSize / 2 + 2, 0, 2 * Math.PI);
+          ctx.fill();
+        }
+        const img = keyIcons[item.key];
+        if (img) ctx.drawImage(img, kx, ky, kIconSize, kIconSize);
+      } else if (item.draw === "dropZone") {
+        ctx.fillStyle = "#EF4444";
+        ctx.beginPath();
+        ctx.arc(kx + kIconSize / 2, cy, 11, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 12px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("1", kx + kIconSize / 2, cy + 4);
+        ctx.textAlign = "left";
+      } else if (item.draw === "cone") {
+        ctx.fillStyle = "#e67b16";
+        ctx.beginPath();
+        ctx.arc(kx + kIconSize / 2, cy, 11, 0, 2 * Math.PI);
+        ctx.fill();
+      } else if (item.draw === "line") {
+        ctx.strokeStyle = "#374151";
+        ctx.lineWidth = 3;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(kx + 2, cy);
+        ctx.lineTo(kx + kIconSize - 2, cy);
+        ctx.stroke();
+        ctx.lineCap = "butt";
+      }
+
+      ctx.fillStyle = "#374151";
+      ctx.font = "14px Arial";
+      ctx.textAlign = "left";
+      ctx.fillText(item.label, kx + kIconSize + 6, cy + 5);
+    });
+
+    // Thin separator below key
+    const kRows = Math.ceil(keyItems.length / kCols);
+    const keyBottomY = keyRowY + kRows * kRowH + 4;
+    ctx.strokeStyle = "#F3F4F6";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(rightX, keyBottomY);
+    ctx.lineTo(rightX + rightW, keyBottomY);
+    ctx.stroke();
+
+    const imgTop = keyBottomY + 12;
     const imgAreaH = H - imgTop - 60;
-    const mapMaxW = Math.min(rightW, 900);
-    const mapMaxH = Math.min(imgAreaH, 900);
+    const mapMaxW = Math.min(rightW, 1060);
+    const mapMaxH = Math.min(imgAreaH, 1060);
     let iw = mapCanvas.width;
     let ih = mapCanvas.height;
     const imgScale = Math.min(mapMaxW / iw, mapMaxH / ih);
@@ -501,7 +595,7 @@ const DeliveryForm = () => {
 
     // ── Footer ────────────────────────────────────────────────────────────────
     ctx.fillStyle = "#9CA3AF";
-    ctx.font = "11px Arial";
+    ctx.font = "20px Arial";
     ctx.textAlign = "center";
     ctx.fillText(
       `Generated ${new Date().toLocaleString()} | HIAB Site Planner — Carter's`,
