@@ -232,6 +232,8 @@ const DesignPlan = () => {
   // Handle mouse down (start drawing or place icon)
   const handleMouseDown = useCallback(
     (e) => {
+      // Only act when already in focus mode — the click itself handles entering it
+      if (!isFocused) return;
       // Suppress ghost mouse events fired by the browser after a touch
       if (Date.now() - lastTouchRef.current < 500) return;
       const canvas = canvasRef.current;
@@ -291,6 +293,7 @@ const DesignPlan = () => {
       redrawCanvas();
     },
     [
+      isFocused,
       tool,
       lineColor,
       designPlan,
@@ -343,8 +346,8 @@ const DesignPlan = () => {
 
   const handleTouchStart = useCallback(
     (e) => {
+      lastTouchRef.current = Date.now(); // always stamp so ghost mousedown is suppressed
       if (!isFocused) return; // let onClick handle the focus tap
-      lastTouchRef.current = Date.now();
       const touch = e.touches[0];
       const { x, y } = getCanvasCoords(touch.clientX, touch.clientY);
 
