@@ -24,7 +24,7 @@ const DesignPlan = () => {
   const [lineColor, setLineColor] = useState("#000000"); // Line color
   const [isDrawing, setIsDrawing] = useState(false); // Drawing state
   const [currentLine, setCurrentLine] = useState(null); // Current line points
-  const [dropZoneCount, setDropZoneCount] = useState(1); // Counter for numbered drop zones
+  // Next drop zone number is always derived from current zones (handles undo correctly)
   const [error, setError] = useState(null);
   const iconImagesRef = useRef({}); // Store preloaded icon Image objects
   const [isFocused, setIsFocused] = useState(false);
@@ -265,10 +265,9 @@ const DesignPlan = () => {
         updateDesignPlan({
           dropZones: [
             ...designPlan.dropZones,
-            { id: Date.now(), number: dropZoneCount, x, y },
+            { id: Date.now(), number: designPlan.dropZones.length + 1, x, y },
           ],
         });
-        setDropZoneCount(dropZoneCount + 1);
       } else if (tool === "loadArrow") {
         updateDesignPlan({
           loadArrow: { x, y, rotation: designPlan.loadArrow?.rotation || 0 },
@@ -296,7 +295,6 @@ const DesignPlan = () => {
       lineColor,
       designPlan,
       updateDesignPlan,
-      dropZoneCount,
       redrawCanvas,
     ],
   );
@@ -358,8 +356,7 @@ const DesignPlan = () => {
       } else if (tool === "cone") {
         updateDesignPlan({ cones: [...designPlan.cones, { id: Date.now(), x, y }] });
       } else if (tool === "dropZone") {
-        updateDesignPlan({ dropZones: [...designPlan.dropZones, { id: Date.now(), number: dropZoneCount, x, y }] });
-        setDropZoneCount(dropZoneCount + 1);
+        updateDesignPlan({ dropZones: [...designPlan.dropZones, { id: Date.now(), number: designPlan.dropZones.length + 1, x, y }] });
       } else if (tool === "loadArrow") {
         updateDesignPlan({ loadArrow: { x, y, rotation: designPlan.loadArrow?.rotation || 0 } });
       } else if (tool === "driver") {
@@ -371,7 +368,7 @@ const DesignPlan = () => {
       }
       redrawCanvas();
     },
-    [isFocused, tool, lineColor, designPlan, updateDesignPlan, dropZoneCount, redrawCanvas],
+    [isFocused, tool, lineColor, designPlan, updateDesignPlan, redrawCanvas],
   );
 
   const handleTouchMove = useCallback(
@@ -425,7 +422,6 @@ const DesignPlan = () => {
       driver: null,
       windArrow: null,
     });
-    setDropZoneCount(1);
     redrawCanvas();
   };
 
