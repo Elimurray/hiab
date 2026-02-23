@@ -112,8 +112,7 @@ const DeliveryForm = () => {
       !designPlan.truck ||
       !designPlan.dropZones.length ||
       !designPlan.loadArrow ||
-      !designPlan.driver ||
-      !designPlan.windArrow
+      !designPlan.driver
     ) {
       navigate("/design-plan");
     }

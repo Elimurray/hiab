@@ -459,11 +459,10 @@ const DesignPlan = () => {
       !designPlan.truck ||
       !designPlan.dropZones.length ||
       !designPlan.loadArrow ||
-      !designPlan.driver ||
-      !designPlan.windArrow
+      !designPlan.driver
     ) {
       setError(
-        "Please add a truck, at least one drop zone, load arrow, driver position, and wind direction.",
+        "Please add a truck, at least one drop zone, load arrow, and driver position.",
       );
       return;
     }
