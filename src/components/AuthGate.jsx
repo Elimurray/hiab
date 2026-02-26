@@ -9,7 +9,7 @@ import Footer from "./Footer";
 import cartersLogo from "../assets/Carters_Horizontal_transparent.png";
 import "./AuthGate.css";
 
-const ALLOWED_DOMAINS = ["@carters.co.nz"];
+// const ALLOWED_DOMAINS = ["@carters.co.nz"];
 const ALLOWED_EMAILS = ["eliazzudo@outlook.com", "aaronmurr55@live.com"];
 
 const LOGIN_REQUEST = {
